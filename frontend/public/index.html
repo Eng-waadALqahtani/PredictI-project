@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>predictIQ - نظام الكشف عن التهديدات السلوكية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: #2c3e50;
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Dynamic Background Image */
+        .dynamic-background {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            z-index: -1;
+            background-image: url('/image/background 1.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            animation: backgroundZoom 15s ease-in-out infinite alternate,
+                       backgroundMove 20s ease-in-out infinite;
+        }
+        
+        /* Animated overlay for depth */
+        .dynamic-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(102, 126, 234, 0.4) 0%,
+                rgba(118, 75, 162, 0.4) 50%,
+                rgba(0, 166, 155, 0.3) 100%
+            );
+            animation: gradientShift 10s ease-in-out infinite alternate,
+                       gradientRotate 25s linear infinite;
+        }
+        
+        /* Animated overlay for additional depth */
+        .dynamic-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at 30% 50%,
+                rgba(102, 126, 234, 0.2) 0%,
+                transparent 50%
+            );
+            animation: radialMove 18s ease-in-out infinite alternate;
+        }
+        
+        /* Zoom animation for background */
+        @keyframes backgroundZoom {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.15) rotate(1deg);
+            }
+            100% {
+                transform: scale(1.1) rotate(-1deg);
+            }
+        }
+        
+        /* Background movement animation */
+        @keyframes backgroundMove {
+            0% {
+                background-position: 0% 0%;
+            }
+            25% {
+                background-position: 100% 0%;
+            }
+            50% {
+                background-position: 100% 100%;
+            }
+            75% {
+                background-position: 0% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+        
+        /* Gradient shift animation */
+        @keyframes gradientShift {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.6;
+                transform: scale(1.1);
+            }
+        }
+        
+        /* Gradient rotation animation */
+        @keyframes gradientRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Radial gradient movement */
+        @keyframes radialMove {
+            0% {
+                transform: translate(0%, 0%) scale(1);
+            }
+            50% {
+                transform: translate(20%, 30%) scale(1.2);
+            }
+            100% {
+                transform: translate(-20%, -30%) scale(0.9);
+            }
+        }
+        
+        /* Parallax effect on scroll */
+        @media (prefers-reduced-motion: no-preference) {
+            .dynamic-background {
+                will-change: transform, background-position;
+            }
+        }
+        
+        .hero-section {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 60px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .hero-logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1E40AF;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 24px;
+            color: #495057;
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-weight: 300;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 18px 48px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: pulseButton 2s ease-in-out infinite;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+        
+        .cta-button:active {
+            transform: translateY(-1px);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @keyframes pulseButton {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            }
+            50% {
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.6);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 36px;
+            }
+            
+            .hero-subtitle {
+                font-size: 18px;
+            }
+            
+            .hero-logo {
+                font-size: 48px;
+            }
+            
+            .cta-button {
+                padding: 16px 36px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Background -->
+    <div class="dynamic-background" id="dynamicBg"></div>
+    
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-logo">🛡️</div>
+        <h1 class="hero-title">predictIQ</h1>
+        <p class="hero-subtitle">نظام الكشف عن التهديدات السلوكية</p>
+        <p class="hero-subtitle" style="font-size: 18px; margin-top: -20px; margin-bottom: 50px;">
+            اكتشاف التهديدات السلوكية ومنعها استباقيًا عبر الحدود الرقمية
+        </p>
+        <a href="/hub.html" class="cta-button">بدء التجربة</a>
+    </div>
+    
+    <script>
+        // Dynamic Background Effects with Enhanced Animations
+        window.addEventListener('DOMContentLoaded', () => {
+            const bg = document.getElementById('dynamicBg');
+            
+            if (!bg) {
+                console.error('❌ Background element not found');
+                return;
+            }
+            
+            console.log('🎨 Initializing dynamic background with animations...');
+            
+            // Enhanced Parallax effect on mouse move
+            let currentX = 0;
+            let currentY = 0;
+            let targetX = 0;
+            let targetY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX / window.innerWidth;
+                const mouseY = e.clientY / window.innerHeight;
+                
+                // Calculate target position
+                targetX = (mouseX - 0.5) * 50;
+                targetY = (mouseY - 0.5) * 50;
+            });
+            
+            // Smooth interpolation for mouse parallax
+            function animateParallax() {
+                currentX += (targetX - currentX) * 0.05;
+                currentY += (targetY - currentY) * 0.05;
+                
+                // Apply transform with existing CSS animations
+                const baseTransform = bg.style.transform || '';
+                bg.style.transform = `translate(${currentX}px, ${currentY}px) ${baseTransform}`;
+                
+                requestAnimationFrame(animateParallax);
+            }
+            animateParallax();
+            
+            // Enhanced parallax on scroll
+            let lastScrollY = window.scrollY;
+            let scrollOffset = 0;
+            let ticking = false;
+            
+            window.addEventListener('scroll', () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(() => {
+                        const scrollY = window.scrollY;
+                        scrollOffset = scrollY * 0.3;
+                        
+                        // Update background position dynamically
+                        const currentBgPos = bg.style.backgroundPosition || 'center center';
+                        bg.style.backgroundPosition = `center ${scrollOffset}px`;
+                        
+                        lastScrollY = scrollY;
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+            
+            // Add pulsing effect
+            let pulseScale = 1;
+            setInterval(() => {
+                pulseScale = pulseScale === 1 ? 1.02 : 1;
+                bg.style.filter = `brightness(${0.95 + pulseScale * 0.1})`;
+            }, 2000);
+            
+            // Check if background image loads
+            const img = new Image();
+            img.onload = () => {
+                console.log('✅ Background image loaded successfully');
+                bg.style.opacity = '0.7';
+                bg.style.transition = 'opacity 1s ease-in';
+            };
+            img.onerror = () => {
+                console.error('❌ Background image failed to load');
+                // Fallback to animated gradient
+                bg.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                bg.style.animation = 'gradientShift 10s ease-in-out infinite alternate';
+            };
+            img.src = '/image/background 1.webp';
+            
+            console.log('✅ Dynamic background animations initialized');
+        });
+    </script>
+</body>
+</html>

