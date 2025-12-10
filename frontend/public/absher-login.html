@@ -872,13 +872,7 @@
             }
         }
     
-        // عند تحميل الصفحة: لو عندي user_id مخزن أشيّك إذا محجوب
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUserId = localStorage.getItem('user_id');
-            if (savedUserId) {
-                checkIfBlocked(savedUserId);
-            }
-        });
+        // تم نقل هذا الكود إلى نهاية الصفحة لتجنب التكرار
     
         // Use sendEvent from events.js (centralized event tracking)
         function sendEventToServerSafe(eventType, userId, extra = {}) {
@@ -1022,15 +1016,29 @@
         
         // Polling للتحقق من التغييرات كل 3 ثوان
         let blockStatusCheckInterval = null;
+        let currentPollingUserId = null; // حفظ user_id المستخدم في polling
+        
         function startBlockStatusPolling(userId) {
             // إيقاف أي polling سابق
             if (blockStatusCheckInterval) {
                 clearInterval(blockStatusCheckInterval);
             }
             
+            // حفظ user_id الحالي
+            currentPollingUserId = userId;
+            
+            console.log(`[ABSHER] Starting polling for user_id: ${userId}`);
+            
             // التحقق كل 3 ثوان
             blockStatusCheckInterval = setInterval(() => {
-                recheckBlockStatus(userId);
+                // استخدام user_id المحفوظ أو الحصول عليه من DEMO_USER_ID
+                const userIdToCheck = currentPollingUserId || 
+                                     (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                                     localStorage.getItem('user_id');
+                
+                if (userIdToCheck) {
+                    recheckBlockStatus(userIdToCheck);
+                }
             }, 3000);
         }
         
@@ -1038,18 +1046,42 @@
             if (blockStatusCheckInterval) {
                 clearInterval(blockStatusCheckInterval);
                 blockStatusCheckInterval = null;
+                currentPollingUserId = null;
+                console.log('[ABSHER] Stopped polling');
             }
         }
         
         // الاستماع لتغييرات localStorage (من Dashboard)
+        // storage event يعمل فقط بين النوافذ المختلفة، لذلك نضيف polling أيضاً
         window.addEventListener('storage', function(e) {
             if (e.key === 'fingerprint_updated') {
-                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                console.log('[ABSHER] Received fingerprint_updated event from Dashboard (cross-window)');
+                const userId = currentPollingUserId || 
+                              (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                              localStorage.getItem('user_id');
                 if (userId) {
+                    console.log(`[ABSHER] Rechecking block status for user_id: ${userId}`);
                     recheckBlockStatus(userId);
                 }
             }
         });
+        
+        // أيضاً الاستماع لتغييرات localStorage في نفس النافذة (لأن storage event لا يعمل في نفس النافذة)
+        let lastFingerprintUpdate = null;
+        setInterval(() => {
+            const currentUpdate = localStorage.getItem('fingerprint_updated');
+            if (currentUpdate && currentUpdate !== lastFingerprintUpdate) {
+                lastFingerprintUpdate = currentUpdate;
+                console.log('[ABSHER] Detected fingerprint_updated change in localStorage (same window)');
+                const userId = currentPollingUserId || 
+                              (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                              localStorage.getItem('user_id');
+                if (userId) {
+                    console.log(`[ABSHER] Rechecking block status for user_id: ${userId}`);
+                    recheckBlockStatus(userId);
+                }
+            }
+        }, 1000); // التحقق كل ثانية
     
         // ============================================
         // MODIFIED LOGIN HANDLER WITH DETECTION
@@ -1219,12 +1251,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             // انتظر تحميل events.js أولاً
             setTimeout(() => {
-                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                // محاولة الحصول على user_id من localStorage أولاً، ثم من DEMO_USER_ID
+                const savedUserId = localStorage.getItem('user_id');
+                const demoUserId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                const userId = savedUserId || demoUserId;
+                
+                console.log(`[ABSHER] Checking block status for user_id: ${userId}`);
+                
                 if (userId) {
                     // التحقق الأولي
                     checkIfBlocked(userId);
-                    // بدء polling للتحقق من التغييرات
+                    // بدء polling للتحقق من التغييرات كل 3 ثوان
                     startBlockStatusPolling(userId);
+                    console.log(`[ABSHER] Started polling for user_id: ${userId}`);
+                } else {
+                    console.warn('[ABSHER] No user_id found - cannot check block status');
                 }
             }, 500);
         });
