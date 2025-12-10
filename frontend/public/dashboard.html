@@ -882,6 +882,11 @@
                     message.classList.remove("show");
                 }, 3000);
                 
+                // إرسال إشارة للصفحات المفتوحة لإعادة التحقق
+                localStorage.setItem('fingerprint_updated', Date.now().toString());
+                localStorage.setItem('fingerprint_action', 'unblock');
+                localStorage.setItem('fingerprint_user_id', userId);
+                
                 loadAdminFingerprints();
             } catch (error) {
                 console.error("Error unblocking user:", error);
@@ -926,6 +931,14 @@
             }
             
             try {
+                // الحصول على user_id قبل الحذف
+                let userId = null;
+                const fingerprints = await fetch(`${API_BASE}/api/v1/fingerprints`).then(r => r.json());
+                const fp = fingerprints.find(f => f.fingerprint_id === fingerprintId);
+                if (fp) {
+                    userId = fp.user_id;
+                }
+                
                 const response = await fetch(`${API_BASE}/api/v1/delete-fingerprint`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -941,6 +954,13 @@
                 setTimeout(() => {
                     message.classList.remove("show");
                 }, 3000);
+                
+                // إرسال إشارة للصفحات المفتوحة لإعادة التحقق
+                if (userId) {
+                    localStorage.setItem('fingerprint_updated', Date.now().toString());
+                    localStorage.setItem('fingerprint_action', 'delete');
+                    localStorage.setItem('fingerprint_user_id', userId);
+                }
                 
                 // Reload fingerprints for the active tab
                 const activeTab = document.querySelector('.tab-content.active');

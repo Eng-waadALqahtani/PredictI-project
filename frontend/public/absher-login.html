@@ -948,6 +948,25 @@
             overlay.style.display = 'flex';
         }
     
+        // إخفاء overlay المنع
+        function hideBlockedUI() {
+            const overlay = document.getElementById('block-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+            
+            const blockedMessage = document.getElementById('blockedMessage');
+            if (blockedMessage) {
+                blockedMessage.classList.remove('show');
+            }
+            
+            const loginButton = document.getElementById('loginButton');
+            if (loginButton) {
+                loginButton.disabled = false;
+                loginButton.textContent = "تسجيل الدخول";
+            }
+        }
+        
         // التحقق هل المستخدم محجوب (تُستدعى عند فتح الصفحة لو كان user_id موجود)
         async function checkIfBlocked(userId) {
             try {
@@ -961,11 +980,76 @@
                     // محجوب
                     showBlockedUI();
                     sendEventToServerSafe('check_blocked', userId);
+                } else if (response.ok) {
+                    // غير محجوب - تأكد من إخفاء overlay
+                    hideBlockedUI();
                 }
             } catch (error) {
                 console.error('Error checking block status:', error);
             }
         }
+        
+        // إعادة التحقق من حالة المستخدم (تُستدعى بعد حذف البصمة أو إلغاء المنع)
+        async function recheckBlockStatus(userId) {
+            if (!userId) {
+                // محاولة الحصول على user_id من DEMO_USER_ID
+                userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                if (!userId) {
+                    console.log('No user_id available for recheck');
+                    return;
+                }
+            }
+            
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+    
+                if (response.status === 403) {
+                    // لا يزال محجوباً
+                    showBlockedUI();
+                } else if (response.ok) {
+                    // تم إلغاء المنع - إخفاء overlay
+                    hideBlockedUI();
+                    console.log('User unblocked - overlay hidden');
+                }
+            } catch (error) {
+                console.error('Error rechecking block status:', error);
+            }
+        }
+        
+        // Polling للتحقق من التغييرات كل 3 ثوان
+        let blockStatusCheckInterval = null;
+        function startBlockStatusPolling(userId) {
+            // إيقاف أي polling سابق
+            if (blockStatusCheckInterval) {
+                clearInterval(blockStatusCheckInterval);
+            }
+            
+            // التحقق كل 3 ثوان
+            blockStatusCheckInterval = setInterval(() => {
+                recheckBlockStatus(userId);
+            }, 3000);
+        }
+        
+        function stopBlockStatusPolling() {
+            if (blockStatusCheckInterval) {
+                clearInterval(blockStatusCheckInterval);
+                blockStatusCheckInterval = null;
+            }
+        }
+        
+        // الاستماع لتغييرات localStorage (من Dashboard)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'fingerprint_updated') {
+                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                if (userId) {
+                    recheckBlockStatus(userId);
+                }
+            }
+        });
     
         // ============================================
         // MODIFIED LOGIN HANDLER WITH DETECTION
@@ -1130,6 +1214,25 @@
                 console.log(`[DEMO] Service opened: ${serviceName}`);
             }
         }
+        
+        // عند تحميل الصفحة: التحقق من حالة المستخدم وبدء polling
+        document.addEventListener('DOMContentLoaded', function() {
+            // انتظر تحميل events.js أولاً
+            setTimeout(() => {
+                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                if (userId) {
+                    // التحقق الأولي
+                    checkIfBlocked(userId);
+                    // بدء polling للتحقق من التغييرات
+                    startBlockStatusPolling(userId);
+                }
+            }, 500);
+        });
+        
+        // عند إغلاق الصفحة: إيقاف polling
+        window.addEventListener('beforeunload', function() {
+            stopBlockStatusPolling();
+        });
     </script>
     
 </body>
