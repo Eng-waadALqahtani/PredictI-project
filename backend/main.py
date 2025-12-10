@@ -243,6 +243,62 @@ def debug_status():
         }), 500
 
 
+@app.route('/api/v1/check-user-status', methods=['POST', 'OPTIONS'])
+def check_user_status():
+    """Check detailed status of a user - for debugging"""
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        return add_cors_headers(jsonify({})), 200
+    
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+
+        if not user_id:
+            error_response = jsonify({
+                "status": "error",
+                "message": "user_id is required"
+            })
+            return add_cors_headers(error_response), 400
+
+        from storage import FINGERPRINTS_STORE
+        
+        # Get all fingerprints for this user
+        user_fingerprints = [fp for fp in FINGERPRINTS_STORE if fp.user_id == user_id]
+        
+        # Check blocking status
+        active_blocking = [fp for fp in user_fingerprints 
+                          if fp.status == "ACTIVE" and fp.risk_score >= 80]
+        
+        is_blocked = len(active_blocking) > 0
+        
+        return add_cors_headers(jsonify({
+            "status": "ok",
+            "user_id": user_id,
+            "is_blocked": is_blocked,
+            "total_fingerprints": len(user_fingerprints),
+            "active_blocking_count": len(active_blocking),
+            "fingerprints": [
+                {
+                    "fingerprint_id": fp.fingerprint_id,
+                    "status": fp.status,
+                    "risk_score": fp.risk_score,
+                    "is_blocking": fp.status == "ACTIVE" and fp.risk_score >= 80
+                }
+                for fp in user_fingerprints
+            ]
+        })), 200
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        error_response = jsonify({
+            "status": "error",
+            "message": str(e)
+        })
+        return add_cors_headers(error_response), 500
+
+
 # ==================  HTML Pages Routes  ==================
 
 @app.route('/')
@@ -308,16 +364,38 @@ def check_and_login():
             })
             return add_cors_headers(error_response), 400
 
+        # Debug: Log all fingerprints for this user
+        from storage import FINGERPRINTS_STORE
+        user_fingerprints = [fp for fp in FINGERPRINTS_STORE if fp.user_id == user_id]
+        print(f"🔍 [DEBUG] Checking user_id: {user_id}")
+        print(f"🔍 [DEBUG] Found {len(user_fingerprints)} fingerprints for this user:")
+        for fp in user_fingerprints:
+            print(f"   - ID: {fp.fingerprint_id}, Status: {fp.status}, Risk: {fp.risk_score}")
+
         is_fingerprinted = is_user_fingerprinted(user_id)
+        
+        print(f"🔍 [DEBUG] is_user_fingerprinted({user_id}) = {is_fingerprinted}")
 
         if is_fingerprinted:
+            # Find which fingerprint is blocking
+            blocking_fps = [fp for fp in FINGERPRINTS_STORE 
+                           if fp.user_id == user_id 
+                           and fp.risk_score >= 80 
+                           and fp.status == "ACTIVE"]
+            print(f"🚫 [BLOCK] User {user_id} is blocked by {len(blocking_fps)} active fingerprint(s)")
+            
             blocked_response = jsonify({
                 "status": "blocked",
                 "allowed": False,
-                "message": "تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى"
+                "message": "تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى",
+                "debug": {
+                    "user_id": user_id,
+                    "blocking_fingerprints": [fp.fingerprint_id for fp in blocking_fps]
+                }
             })
             return add_cors_headers(blocked_response), 403
         else:
+            print(f"✅ [ALLOW] User {user_id} is not blocked")
             success_response = jsonify({
                 "status": "ok",
                 "allowed": True,
@@ -326,6 +404,8 @@ def check_and_login():
             return add_cors_headers(success_response), 200
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         error_response = jsonify({
             "status": "error",
             "message": str(e)

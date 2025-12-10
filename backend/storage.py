@@ -73,10 +73,13 @@ def clear_user_fingerprints(user_id: str) -> int:
     Returns the number of fingerprints that were updated.
     """
     cleared_count = 0
+    print(f"🔓 [UNBLOCK] Clearing fingerprints for user_id: {user_id}")
     for fp in FINGERPRINTS_STORE:
         if fp.user_id == user_id and fp.status in ("ACTIVE", "BLOCKED"):
+            print(f"   - Changing fingerprint {fp.fingerprint_id} from {fp.status} to CLEARED")
             fp.status = "CLEARED"
             cleared_count += 1
+    print(f"✅ [UNBLOCK] Cleared {cleared_count} fingerprint(s) for user {user_id}")
     return cleared_count
 
 
@@ -87,9 +90,13 @@ def delete_fingerprint(fingerprint_id: str) -> bool:
     """
     global FINGERPRINTS_STORE
 
+    print(f"🗑️ [DELETE] Attempting to delete fingerprint: {fingerprint_id}")
     for idx, fp in enumerate(FINGERPRINTS_STORE):
         if fp.fingerprint_id == fingerprint_id:
+            print(f"   - Found fingerprint {fingerprint_id} for user {fp.user_id}, status: {fp.status}")
             del FINGERPRINTS_STORE[idx]
+            print(f"✅ [DELETE] Successfully deleted fingerprint {fingerprint_id}")
             return True
 
+    print(f"⚠️ [DELETE] Fingerprint {fingerprint_id} not found")
     return False

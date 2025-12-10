@@ -898,7 +898,8 @@
                 return;
             }
     
-            const userId = `user-${idNumber}`;
+            // Use DEMO_USER_ID from events.js (centralized) - ALWAYS use DEMO_USER_ID
+            const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : (typeof DEMO_USER_ID !== 'undefined' ? DEMO_USER_ID : `user-${idNumber}`);
     
             // ============================================
             // ATTACK DETECTION (SILENT - NO USER WARNING)
