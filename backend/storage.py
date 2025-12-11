@@ -205,6 +205,14 @@ def update_fingerprint_status(fingerprint_id: str, new_status: str) -> bool:
         db_fp.updated_at = datetime.utcnow()
         session.commit()
         print(f"   💾 [DB] Updated fingerprint {fingerprint_id} status to {new_status}")
+        
+        # Update FINGERPRINTS_STORE for backward compatibility
+        global FINGERPRINTS_STORE
+        for fp in FINGERPRINTS_STORE:
+            if fp.fingerprint_id == fingerprint_id:
+                fp.status = new_status
+                break
+        
         return True
     except Exception as e:
         session.rollback()
@@ -237,6 +245,13 @@ def clear_user_fingerprints(user_id: str) -> int:
         
         session.commit()
         print(f"✅ [UNBLOCK] Cleared {cleared_count} fingerprint(s) for user {user_id}")
+        
+        # Update FINGERPRINTS_STORE for backward compatibility
+        global FINGERPRINTS_STORE
+        for fp in FINGERPRINTS_STORE:
+            if fp.user_id == user_id and fp.status in ("ACTIVE", "BLOCKED"):
+                fp.status = "CLEARED"
+        
         return cleared_count
     except Exception as e:
         session.rollback()

@@ -350,15 +350,26 @@ def get_risk_score(raw_score: float) -> int:
 def is_user_fingerprinted(user_id: str) -> bool:
     """
     Check if a user has an ACTIVE high-risk threat fingerprint registered.
+    Reads directly from database to ensure latest status is checked.
     """
-    for fingerprint in FINGERPRINTS_STORE:
-        # Check if this fingerprint belongs to the user, has high risk (>= 80), and is ACTIVE
-        if (fingerprint.user_id == user_id and 
-            fingerprint.risk_score >= 80 and 
-            fingerprint.status == "ACTIVE"):
-            return True
+    from storage import get_fingerprints
+    from db import get_db_session, FingerprintDB
     
-    return False
+    # Read directly from database to get latest status
+    session = get_db_session()
+    try:
+        db_fingerprints = session.query(FingerprintDB).filter(
+            FingerprintDB.user_id == user_id,
+            FingerprintDB.status == "ACTIVE",
+            FingerprintDB.risk_score >= 80
+        ).all()
+        
+        if db_fingerprints:
+            return True
+        
+        return False
+    finally:
+        session.close()
 
 
 # ================== FEATURE 3: Multi-Account Linking Detection ==================

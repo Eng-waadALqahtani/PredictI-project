@@ -135,9 +135,15 @@ def init_db():
     Initialize the database by creating all tables if they don't exist.
     Call this on application startup.
     """
-    print(f"🗄️ [DB] Initializing database: {_database_url}")
-    Base.metadata.create_all(bind=engine)
-    print("✅ [DB] Database tables created/verified successfully")
+    try:
+        print(f"[DB] Initializing database: {_database_url}")
+        Base.metadata.create_all(bind=engine)
+        print("[DB] Database tables created/verified successfully")
+    except UnicodeEncodeError:
+        # Fallback for Windows console encoding issues
+        print(f"[DB] Initializing database: {_database_url}")
+        Base.metadata.create_all(bind=engine)
+        print("[DB] Database tables created/verified successfully")
 
 
 def get_db_session() -> Session:

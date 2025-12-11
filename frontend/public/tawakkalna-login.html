@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>توكلنا - محاكاة الخدمات الحكومية (نسخة تجريبية)</title>
+    <title>توكلنا - تسجيل الدخول</title>
     <script src="/js/events.js" defer></script>
     <style>
         * {
@@ -14,14 +14,22 @@
 
         body {
             font-family: 'Segoe UI', 'Arial', 'Tahoma', 'Cairo', sans-serif;
-            background: linear-gradient(135deg, #00a69b 0%, #00897b 50%, #00695c 100%);
+            background: #f5f7fa;
             min-height: 100vh;
             color: #333333;
             direction: rtl;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        /* Top Bar Header */
+        /* Top Bar */
         .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             padding: 15px 30px;
@@ -29,8 +37,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
             z-index: 1000;
         }
 
@@ -41,13 +47,37 @@
         .top-bar .right h1 {
             font-size: 24px;
             font-weight: 700;
-            color: #00a69b;
+            color: #009688;
             margin-bottom: 5px;
         }
 
         .top-bar .right p {
             font-size: 12px;
             color: #666;
+        }
+
+        .top-bar .left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .home-link {
+            color: #009688;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: 2px solid #009688;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .home-link:hover {
+            background: #009688;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 150, 136, 0.3);
         }
 
         .top-bar .left .badge {
@@ -60,37 +90,35 @@
             box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
 
-        /* Main Layout */
-        .main-layout {
-            display: flex;
-            min-height: calc(100vh - 70px);
-            padding: 40px 20px;
-            gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
         /* Login Card */
-        .login-card {
+        .login-container {
             background: white;
             border-radius: 16px;
-            padding: 40px;
+            padding: 50px 40px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
             width: 100%;
-            max-width: 450px;
-            height: fit-content;
+            max-width: 480px;
+            margin-top: 100px;
         }
 
-        .login-card h2 {
+        .login-container h2 {
             font-size: 28px;
             font-weight: 700;
             color: #333;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-align: center;
         }
 
+        .login-container .subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .form-group label {
@@ -113,13 +141,13 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #00a69b;
+            border-color: #009688;
         }
 
         .login-button {
             width: 100%;
             padding: 16px;
-            background: linear-gradient(135deg, #00a69b 0%, #00897b 100%);
+            background: linear-gradient(135deg, #009688 0%, #00796b 100%);
             color: white;
             border: none;
             border-radius: 8px;
@@ -132,173 +160,40 @@
 
         .login-button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 166, 155, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 150, 136, 0.4);
         }
 
         .login-button:active {
             transform: translateY(0);
         }
 
-        .login-message {
+        .success-message {
             margin-top: 15px;
             padding: 12px;
             background: #e8f5f4;
-            border: 2px solid #00a69b;
+            border: 2px solid #009688;
             border-radius: 8px;
-            color: #00897b;
+            color: #00796b;
             font-size: 14px;
             text-align: center;
             display: none;
         }
 
-        .login-message.show {
+        .success-message.show {
             display: block;
             animation: fadeIn 0.3s ease;
         }
 
-        .demo-note {
-            margin-top: 20px;
-            padding: 12px;
+        .warning-box {
+            margin-top: 25px;
+            padding: 15px;
             background: #fff3cd;
             border: 1px solid #ffc107;
             border-radius: 8px;
             font-size: 12px;
             color: #856404;
             text-align: center;
-        }
-
-        /* Services Section */
-        .services-section {
-            flex: 1;
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            opacity: 0.5;
-            transition: opacity 0.5s ease;
-        }
-
-        .services-section.active {
-            opacity: 1;
-        }
-
-        .services-section h2 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 30px;
-            text-align: right;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .service-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            padding: 24px;
-            border: 2px solid #e0e0e0;
-            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-            text-align: right;
-        }
-
-        .service-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            border-color: #00a69b;
-        }
-
-        .service-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #00a69b 0%, #00897b 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 8px rgba(0, 166, 155, 0.3);
-        }
-
-        .service-card h3 {
-            font-size: 20px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .service-card p {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 16px;
-            line-height: 1.5;
-        }
-
-        .service-button {
-            width: 100%;
-            padding: 12px;
-            background: white;
-            color: #00a69b;
-            border: 2px solid #00a69b;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .service-button:hover {
-            background: #00a69b;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 166, 155, 0.3);
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .main-layout {
-                flex-direction: column;
-            }
-
-            .login-card {
-                max-width: 100%;
-            }
-
-            .services-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .top-bar {
-                padding: 12px 20px;
-            }
-
-            .top-bar .right h1 {
-                font-size: 20px;
-            }
-
-            .top-bar .left .badge {
-                padding: 6px 12px;
-                font-size: 11px;
-            }
-
-            .main-layout {
-                padding: 20px 15px;
-            }
-
-            .login-card,
-            .services-section {
-                padding: 30px 20px;
-            }
-
-            .services-grid {
-                grid-template-columns: 1fr;
-            }
+            line-height: 1.6;
         }
 
         @keyframes fadeIn {
@@ -312,43 +207,31 @@
             }
         }
 
-        /* Blocked Overlay */
-        .blocked-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .top-bar {
+                padding: 12px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
 
-        .blocked-overlay.show {
-            display: flex;
-        }
+            .top-bar .right h1 {
+                font-size: 20px;
+            }
 
-        .blocked-message {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            text-align: center;
-            max-width: 500px;
-            margin: 20px;
-        }
+            .top-bar .left {
+                width: 100%;
+                justify-content: space-between;
+            }
 
-        .blocked-message h2 {
-            color: #e74c3c;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
+            .login-container {
+                padding: 40px 25px;
+                margin-top: 120px;
+            }
 
-        .blocked-message p {
-            color: #666;
-            font-size: 16px;
-            line-height: 1.6;
+            .login-container h2 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -356,307 +239,96 @@
     <!-- Top Bar -->
     <header class="top-bar">
         <div class="right">
-            <h1>توكلنا - محاكاة الخدمات الحكومية</h1>
-            <p>نسخة تجريبية لأغراض الأمن السيبراني (Digital Threat Fingerprint)</p>
+            <h1>توكلنا – محاكاة الخدمات الحكومية</h1>
+            <p>(Digital Threat Fingerprint) نسخة تجريبية لأغراض الأمن السيبراني</p>
         </div>
         <div class="left">
+            <a href="/hub.html" class="home-link">🏠 الصفحة الرئيسية</a>
             <span class="badge">PredictIQ Demo</span>
         </div>
     </header>
 
-    <!-- Main Layout -->
-    <main class="main-layout">
-        <!-- Login Card -->
-        <section class="login-card">
-            <h2>تسجيل الدخول</h2>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="userId">رقم الهوية / رقم الجوال</label>
-                    <input 
-                        type="text" 
-                        id="userId" 
-                        name="userId" 
-                        placeholder="أدخل رقم الهوية أو الجوال"
-                        required
-                        maxlength="10"
-                    >
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">كلمة المرور / رمز الدخول</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="أدخل كلمة المرور"
-                        required
-                    >
-                </div>
+    <!-- Login Card -->
+    <main class="login-container">
+        <h2>تسجيل الدخول</h2>
+        <p class="subtitle">أدخل بياناتك التجريبية للوصول إلى المحفظة الرقمية والخدمات الحكومية.</p>
 
-                <button type="submit" class="login-button">تسجيل الدخول</button>
-
-                <div class="login-message" id="loginMessage"></div>
-
-                <div class="demo-note">
-                    ⚠️ هذه نسخة تجريبية لأغراض الأمن السيبراني، وليست مرتبطة بالبيانات الحقيقية.
-                </div>
-            </form>
-        </section>
-
-        <!-- Services Section -->
-        <section class="services-section" id="servicesSection">
-            <h2>المحفظة الرقمية والخدمات المتاحة</h2>
-            <div class="services-grid">
-                <!-- National ID Service -->
-                <div class="service-card">
-                    <div class="service-icon">🆔</div>
-                    <h3>الهوية الوطنية الرقمية</h3>
-                    <p>عرض وتحميل الهوية الوطنية الرقمية بصيغة PDF</p>
-                    <button 
-                        class="service-button"
-                        data-track-service="twa_national_id"
-                        onclick="handleNationalId()"
-                    >
-                        عرض / تحميل الهوية
-                    </button>
-                </div>
-
-                <!-- Family Registry Service -->
-                <div class="service-card">
-                    <div class="service-icon">👨‍👩‍👧‍👦</div>
-                    <h3>السجل الأسري</h3>
-                    <p>تحميل السجل الأسري الرسمي بصيغة PDF</p>
-                    <button 
-                        class="service-button"
-                        data-track-service="twa_family_record"
-                        onclick="handleFamilyRecord()"
-                    >
-                        تحميل السجل الأسري
-                    </button>
-                </div>
-
-                <!-- Health Report Service -->
-                <div class="service-card">
-                    <div class="service-icon">🏥</div>
-                    <h3>الجواز الصحي / السجل الصحي</h3>
-                    <p>تنزيل التقرير الصحي وسجل التطعيمات</p>
-                    <button 
-                        class="service-button"
-                        data-track-service="twa_health_report"
-                        onclick="handleHealthReport()"
-                    >
-                        تنزيل التقرير الصحي
-                    </button>
-                </div>
-
-                <!-- Driving License Service -->
-                <div class="service-card">
-                    <div class="service-icon">🚗</div>
-                    <h3>رخصة القيادة</h3>
-                    <p>عرض رخصة القيادة الرقمية ومعلومات الرخصة</p>
-                    <button 
-                        class="service-button"
-                        data-track-service="twa_driving_license"
-                        onclick="handleDrivingLicense()"
-                    >
-                        عرض رخصة القيادة
-                    </button>
-                </div>
-
-                <!-- Vehicle Insurance Service -->
-                <div class="service-card">
-                    <div class="service-icon">🛡️</div>
-                    <h3>التأمين على المركبة</h3>
-                    <p>عرض تفاصيل التأمين على المركبة وسجل التأمين</p>
-                    <button 
-                        class="service-button"
-                        data-track-service="twa_vehicle_insurance"
-                        onclick="handleVehicleInsurance()"
-                    >
-                        عرض التأمين
-                    </button>
-                </div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="idNumber">رقم الهوية الوطنية / رقم الجوال</label>
+                <input 
+                    type="text" 
+                    id="idNumber" 
+                    name="idNumber" 
+                    placeholder="8765432134"
+                    required
+                    maxlength="10"
+                >
             </div>
-        </section>
+
+            <div class="form-group">
+                <label for="password">كلمة المرور / رمز الدخول</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="••••••••"
+                    required
+                >
+            </div>
+
+            <button type="submit" id="loginButton" class="login-button">تسجيل الدخول</button>
+
+            <div class="success-message" id="successMessage">
+                تم تسجيل الدخول بنجاح (محاكاة)، سيتم نقلك للخدمات …
+            </div>
+
+            <div class="warning-box">
+                ⚠️ هذه نسخة تجريبية لأغراض الأمن السيبراني، وليست مرتبطة بالبيانات الحقيقية.
+            </div>
+        </form>
     </main>
 
-    <!-- Blocked Overlay -->
-    <div class="blocked-overlay" id="blockedOverlay">
-        <div class="blocked-message">
-            <h2>🚫 تم إيقاف الدخول مؤقتاً</h2>
-            <p>تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى. يرجى المحاولة لاحقاً أو التواصل مع الدعم الفني.</p>
-        </div>
-    </div>
-
     <script>
-        // Wait for events.js to load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Check if user is blocked on page load
-            setTimeout(() => {
-                checkBlockStatus();
-            }, 500);
-        });
-
-        // Login Handler
         async function handleLogin(event) {
             event.preventDefault();
             
-            const userId = document.getElementById('userId').value.trim();
+            const idNumber = document.getElementById('idNumber').value.trim();
             const password = document.getElementById('password').value;
-            
-            if (!userId || !password) {
+
+            if (!idNumber || !password) {
                 alert('يرجى إدخال جميع الحقول');
                 return;
             }
 
-            // Send login_attempt event using events.js
-            if (typeof sendEvent === 'function') {
-                sendEvent('login_attempt', null, { page: 'tawakkalna' });
-            }
-
-            // Check if user is blocked
+            // Send login events using events.js
             try {
-                const userIdToCheck = typeof getCurrentUserId === 'function' ? getCurrentUserId() : userId;
-                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userIdToCheck })
-                });
-
-                if (response.status === 403) {
-                    // User is blocked
-                    showBlockedOverlay();
-                    if (typeof sendEvent === 'function') {
-                        sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint', page: 'tawakkalna' });
-                    }
-                    return;
-                }
-
-                // Login successful (simulated)
-                const messageEl = document.getElementById('loginMessage');
-                messageEl.textContent = 'تم تسجيل الدخول بنجاح (محاكاة).';
-                messageEl.classList.add('show');
-
-                // Activate services section
-                document.getElementById('servicesSection').classList.add('active');
-
-                // Send login_success event
                 if (typeof sendEvent === 'function') {
-                    sendEvent('login_success', null, { page: 'tawakkalna' });
+                    sendEvent("login_attempt", null, { page: "tawakkalna-login" });
                 }
-
-            } catch (error) {
-                console.error('Error during login:', error);
-                alert('حدث خطأ أثناء الاتصال بالخادم');
+            } catch (e) {
+                console.error("Error sending login_attempt event:", e);
             }
-        }
 
-        // Service Handlers
-        function handleNationalId() {
-            console.log('🆔 [SERVICE] National ID requested');
-            
-            if (typeof sendEvent === 'function') {
-                sendEvent('download_file', 'national_id', {
-                    page: 'tawakkalna',
-                    file_type: 'pdf',
-                    service_label: 'الهوية الوطنية الرقمية'
-                });
-            }
-            
-            // Simulate download
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+
+            // Send login_success event after a short delay
             setTimeout(() => {
-                alert('تم تنزيل الهوية الوطنية (محاكاة)');
-            }, 500);
-        }
-
-        function handleFamilyRecord() {
-            console.log('👨‍👩‍👧‍👦 [SERVICE] Family Record requested');
-            
-            if (typeof sendEvent === 'function') {
-                sendEvent('download_file', 'family_record', {
-                    page: 'tawakkalna',
-                    file_type: 'pdf',
-                    service_label: 'السجل الأسري'
-                });
-            }
-            
-            // Simulate download
-            setTimeout(() => {
-                alert('تم تنزيل السجل الأسري (محاكاة)');
-            }, 500);
-        }
-
-        function handleHealthReport() {
-            console.log('🏥 [SERVICE] Health Report requested');
-            
-            if (typeof sendEvent === 'function') {
-                sendEvent('download_file', 'health_report', {
-                    page: 'tawakkalna',
-                    file_type: 'pdf',
-                    service_label: 'السجل الصحي'
-                });
-            }
-            
-            // Simulate download
-            setTimeout(() => {
-                alert('تم تنزيل التقرير الصحي (محاكاة)');
-            }, 500);
-        }
-
-        function handleDrivingLicense() {
-            console.log('🚗 [SERVICE] Driving License requested');
-            
-            if (typeof sendEvent === 'function') {
-                sendEvent('view_service', 'driving_license', {
-                    page: 'tawakkalna',
-                    service_label: 'رخصة القيادة'
-                });
-            }
-            
-            // Simulate view
-            setTimeout(() => {
-                alert('عرض رخصة القيادة (محاكاة)');
-            }, 500);
-        }
-
-        function handleVehicleInsurance() {
-            console.log('🛡️ [SERVICE] Vehicle Insurance requested');
-            
-            if (typeof sendEvent === 'function') {
-                sendEvent('view_service', 'vehicle_insurance', {
-                    page: 'tawakkalna',
-                    service_label: 'تأمين المركبة'
-                });
-            }
-            
-            // Simulate view
-            setTimeout(() => {
-                alert('عرض تفاصيل التأمين (محاكاة)');
-            }, 500);
-        }
-
-        // Block Status Check
-        async function checkBlockStatus() {
-            try {
-                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
-                if (!userId) return;
-
-                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, precheck_only: true })
-                });
-
-                if (response.status === 403) {
-                    showBlockedOverlay();
+                try {
+                    if (typeof sendEvent === 'function') {
+                        sendEvent("login_success", null, { page: "tawakkalna-login" });
+                    }
+                } catch (e) {
+                    console.error("Error sending login_success event:", e);
                 }
-            } catch (error) {
-                console.error('Error checking block status:', error);
-            }
-        }
+            }, 300);
 
-        function showBlockedOverlay() {
-            document.getElementById('blockedOverlay').classList.add('show');
+            // Redirect to services page after 1.2 seconds
+            setTimeout(() => {
+                window.location.href = "/tawakkalna-services.html";
+            }, 1200);
         }
     </script>
 </body>

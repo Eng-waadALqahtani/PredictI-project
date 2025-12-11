@@ -332,6 +332,11 @@ def tawakkalna_login_page():
     return app.send_static_file('tawakkalna-login.html')
 
 
+@app.route('/tawakkalna-services.html')
+def tawakkalna_services_page():
+    return app.send_static_file('tawakkalna-services.html')
+
+
 @app.route('/absher-login.html')
 def absher_login_page():
     return app.send_static_file('absher-login.html')
@@ -369,25 +374,41 @@ def check_and_login():
             })
             return add_cors_headers(error_response), 400
 
-        # Debug: Log all fingerprints for this user
-        from storage import FINGERPRINTS_STORE
-        user_fingerprints = [fp for fp in FINGERPRINTS_STORE if fp.user_id == user_id]
-        print(f"🔍 [DEBUG] Checking user_id: {user_id}")
-        print(f"🔍 [DEBUG] Found {len(user_fingerprints)} fingerprints for this user:")
-        for fp in user_fingerprints:
-            print(f"   - ID: {fp.fingerprint_id}, Status: {fp.status}, Risk: {fp.risk_score}")
+        # Debug: Log all fingerprints for this user (read from database)
+        from db import get_db_session, FingerprintDB
+        from storage import get_fingerprints
+        
+        # Read from database to get latest status
+        session = get_db_session()
+        try:
+            db_fingerprints = session.query(FingerprintDB).filter(
+                FingerprintDB.user_id == user_id
+            ).all()
+            
+            print(f"🔍 [DEBUG] Checking user_id: {user_id}")
+            print(f"🔍 [DEBUG] Found {len(db_fingerprints)} fingerprints for this user in DB:")
+            for db_fp in db_fingerprints:
+                print(f"   - ID: {db_fp.fingerprint_id}, Status: {db_fp.status}, Risk: {db_fp.risk_score}")
+        finally:
+            session.close()
 
         is_fingerprinted = is_user_fingerprinted(user_id)
         
         print(f"🔍 [DEBUG] is_user_fingerprinted({user_id}) = {is_fingerprinted}")
 
         if is_fingerprinted:
-            # Find which fingerprint is blocking
-            blocking_fps = [fp for fp in FINGERPRINTS_STORE 
-                           if fp.user_id == user_id 
-                           and fp.risk_score >= 80 
-                           and fp.status == "ACTIVE"]
-            print(f"🚫 [BLOCK] User {user_id} is blocked by {len(blocking_fps)} active fingerprint(s)")
+            # Find which fingerprint is blocking (from database)
+            session = get_db_session()
+            try:
+                blocking_fps = session.query(FingerprintDB).filter(
+                    FingerprintDB.user_id == user_id,
+                    FingerprintDB.risk_score >= 80,
+                    FingerprintDB.status == "ACTIVE"
+                ).all()
+                blocking_fp_ids = [fp.fingerprint_id for fp in blocking_fps]
+                print(f"🚫 [BLOCK] User {user_id} is blocked by {len(blocking_fps)} active fingerprint(s)")
+            finally:
+                session.close()
             
             blocked_response = jsonify({
                 "status": "blocked",
@@ -395,7 +416,7 @@ def check_and_login():
                 "message": "تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى",
                 "debug": {
                     "user_id": user_id,
-                    "blocking_fingerprints": [fp.fingerprint_id for fp in blocking_fps]
+                    "blocking_fingerprints": blocking_fp_ids
                 }
             })
             return add_cors_headers(blocked_response), 403

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توكلنا - المحفظة الرقمية والخدمات</title>
+    <script src="/js/events.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', 'Tahoma', 'Cairo', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            color: #333333;
+            direction: rtl;
+            padding-top: 90px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .top-bar .right {
+            flex: 1;
+        }
+
+        .top-bar .right h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #009688;
+            margin-bottom: 5px;
+        }
+
+        .top-bar .right p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .top-bar .left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .home-link {
+            color: #009688;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: 2px solid #009688;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .home-link:hover {
+            background: #009688;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 150, 136, 0.3);
+        }
+
+        .top-bar .left .badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Content */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .services-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .services-card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+
+        .services-card .subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: right;
+            margin-bottom: 35px;
+            line-height: 1.6;
+        }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .service-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            text-align: right;
+        }
+
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-color: #009688;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 150, 136, 0.3);
+        }
+
+        .service-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .service-card p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .service-button {
+            width: 100%;
+            padding: 12px 20px;
+            background: white;
+            color: #009688;
+            border: 2px solid #009688;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .service-button:hover {
+            background: #009688;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 150, 136, 0.3);
+        }
+
+        .service-button:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+
+            .top-bar {
+                padding: 12px 20px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .top-bar .right h1 {
+                font-size: 20px;
+            }
+
+            .top-bar .left {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .services-card {
+                padding: 30px 20px;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .service-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="right">
+            <h1>توكلنا – محاكاة الخدمات الحكومية</h1>
+            <p>(Digital Threat Fingerprint) نسخة تجريبية لأغراض الأمن السيبراني</p>
+        </div>
+        <div class="left">
+            <a href="/hub.html" class="home-link">🏠 الصفحة الرئيسية</a>
+            <span class="badge">PredictIQ Demo</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <div class="services-card">
+            <h2>المحفظة الرقمية والخدمات المتاحة</h2>
+            <p class="subtitle">يمكنك هنا تجربة تحميل الهويات والسجلات الرقمية مع تتبع الأحداث بواسطة PredictIQ.</p>
+
+            <div class="services-grid">
+                <!-- Family Record Service -->
+                <div class="service-card">
+                    <div class="service-icon">👨‍👩‍👧‍👦</div>
+                    <h3>السجل الأسري</h3>
+                    <p>تحميل السجل الأسري الرسمي بصيغة PDF (محاكاة).</p>
+                    <button class="service-button" onclick="downloadFamilyRecord()">
+                        تحميل السجل الأسري
+                    </button>
+                </div>
+
+                <!-- National Digital ID Service -->
+                <div class="service-card">
+                    <div class="service-icon">🆔</div>
+                    <h3>الهوية الوطنية الرقمية</h3>
+                    <p>عرض وتحميل الهوية الوطنية الرقمية بصيغة PDF (محاكاة).</p>
+                    <button class="service-button" onclick="downloadNationalId()">
+                        عرض / تحميل الهوية
+                    </button>
+                </div>
+
+                <!-- Health Passport Service -->
+                <div class="service-card">
+                    <div class="service-icon">🏥</div>
+                    <h3>الجواز الصحي / السجل الصحي</h3>
+                    <p>تنزيل التقرير الصحي وسجل التطعيمات (محاكاة).</p>
+                    <button class="service-button" onclick="downloadHealthReport()">
+                        تنزيل التقرير الصحي
+                    </button>
+                </div>
+
+                <!-- Driving License Service -->
+                <div class="service-card">
+                    <div class="service-icon">🚗</div>
+                    <h3>رخصة القيادة</h3>
+                    <p>عرض رخصة القيادة الرقمية ومعلومات الرخصة (محاكاة).</p>
+                    <button class="service-button" onclick="viewDrivingLicense()">
+                        عرض رخصة القيادة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Family Record Download
+        function downloadFamilyRecord() {
+            try {
+                if (typeof sendEvent === 'function') {
+                    sendEvent("download_file", "family_record", {
+                        service_label: "السجل الأسري",
+                        page: "tawakkalna-services"
+                    });
+                }
+                console.log("Simulated download: family_record.pdf");
+            } catch (e) {
+                console.error("Error sending download_file event:", e);
+            }
+        }
+
+        // National ID Download
+        function downloadNationalId() {
+            try {
+                if (typeof sendEvent === 'function') {
+                    sendEvent("download_file", "national_id", {
+                        service_label: "الهوية الوطنية الرقمية",
+                        page: "tawakkalna-services"
+                    });
+                }
+                console.log("Simulated download: national_id.pdf");
+            } catch (e) {
+                console.error("Error sending download_file event:", e);
+            }
+        }
+
+        // Health Report Download
+        function downloadHealthReport() {
+            try {
+                if (typeof sendEvent === 'function') {
+                    sendEvent("download_file", "health_report", {
+                        service_label: "السجل الصحي",
+                        page: "tawakkalna-services"
+                    });
+                }
+                console.log("Simulated download: health_report.pdf");
+            } catch (e) {
+                console.error("Error sending download_file event:", e);
+            }
+        }
+
+        // Driving License View
+        function viewDrivingLicense() {
+            try {
+                if (typeof sendEvent === 'function') {
+                    sendEvent("view_service", "driving_license", {
+                        service_label: "رخصة القيادة",
+                        page: "tawakkalna-services"
+                    });
+                }
+                console.log("Simulated view: driving_license");
+            } catch (e) {
+                console.error("Error sending view_service event:", e);
+            }
+        }
+    </script>
+</body>
+</html>
+
