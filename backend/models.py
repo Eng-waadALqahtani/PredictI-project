@@ -13,6 +13,8 @@ class Event:
     platform: Optional[str] = None
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
+    device_type: Optional[str] = None  # e.g., "mobile", "laptop", "tablet", "desktop"
+    location: Optional[str] = None  # City name, e.g., "Riyadh", "Abha"
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert Event to dictionary for JSON serialization"""
@@ -23,7 +25,9 @@ class Event:
             "timestamp1": self.timestamp1.isoformat(),
             "platform": self.platform,
             "ip_address": self.ip_address,
-            "user_agent": self.user_agent
+            "user_agent": self.user_agent,
+            "device_type": self.device_type,
+            "location": self.location
         }
 
 
@@ -41,7 +45,7 @@ class ThreatFingerprint:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert ThreatFingerprint to dictionary for JSON serialization"""
-        return {
+        result = {
             "fingerprint_id": self.fingerprint_id,
             "risk_score": self.risk_score,
             "user_id": self.user_id,
@@ -51,3 +55,9 @@ class ThreatFingerprint:
             "ip_address": self.ip_address,
             "user_agent": self.user_agent
         }
+        
+        # Add related_fingerprints if present (for similarity detection)
+        if hasattr(self, 'related_fingerprints') and self.related_fingerprints:
+            result["related_fingerprints"] = self.related_fingerprints
+        
+        return result

@@ -14,6 +14,7 @@ from storage import (
     delete_fingerprint
 )
 from engine import process_event, is_user_fingerprinted
+from db import init_db
 
 # ==================  Paths & App Setup  ==================
 
@@ -110,6 +111,8 @@ def receive_event():
         
         user_agent = request.headers.get("User-Agent", "unknown")
         platform = data.get("platform")
+        device_type = data.get("device_type")  # e.g., "mobile", "laptop", "tablet", "desktop"
+        location = data.get("location")  # City name, e.g., "Riyadh", "Abha"
 
         event = Event(
             event_type=event_type,
@@ -118,7 +121,9 @@ def receive_event():
             timestamp1=timestamp,
             platform=platform,
             ip_address=ip_address,
-            user_agent=user_agent
+            user_agent=user_agent,
+            device_type=device_type,
+            location=location
         )
 
         # Store the event
@@ -538,6 +543,9 @@ def delete_fingerprint_route():
 # ==================  App Entry  ==================
 
 if __name__ == '__main__':
+    # Initialize database (creates tables if they don't exist)
+    init_db()
+    
     # Ensure the ml/models directory exists
     model_dir = os.path.join(os.path.dirname(__file__), '..', 'ml', 'models')
     os.makedirs(model_dir, exist_ok=True)

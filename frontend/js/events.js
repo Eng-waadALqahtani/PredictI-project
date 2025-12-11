@@ -66,8 +66,8 @@ console.log(`   Demo Device ID: ${DEMO_DEVICE_ID}`);
  * @param {object} extra - Additional data to include in the event
  */
 function sendEvent(eventType, serviceName = null, extra = {}) {
-    const payload = {
-        event_type: eventType,
+  const payload = {
+    event_type: eventType,
         user_id: getCurrentUserId(),
         device_id: getCurrentDeviceId(),
         timestamp1: new Date().toISOString(),
@@ -77,9 +77,9 @@ function sendEvent(eventType, serviceName = null, extra = {}) {
     };
 
     return fetch(`${API_BASE}/api/v1/event`, {
-        method: "POST",
+    method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+    body: JSON.stringify(payload)
     })
     .then(response => response.json())
     .then(data => {
@@ -87,7 +87,7 @@ function sendEvent(eventType, serviceName = null, extra = {}) {
         if (data.fingerprint_generated) {
             console.warn("⚠️ Threat Fingerprint Generated:", data.fingerprint_id);
             if (!DEMO_MODE) {
-                showNotification("Threat detected! Check dashboard for details.", "warning");
+            showNotification("Threat detected! Check dashboard for details.", "warning");
             } else {
                 console.log("[DEMO_NOTIFICATION_SUPPRESSED] Threat detected! Check dashboard for details.");
             }
@@ -97,10 +97,10 @@ function sendEvent(eventType, serviceName = null, extra = {}) {
     .catch(err => {
         console.error("❌ Error sending event:", err);
         if (!DEMO_MODE) {
-            showNotification("Failed to send event to server", "error");
+        showNotification("Failed to send event to server", "error");
         } else {
             console.log("[DEMO_NOTIFICATION_SUPPRESSED] Failed to send event to server");
-        }
+}
         throw err;
     });
 }
@@ -231,17 +231,17 @@ window.triggerHighSpeedAttack = function triggerHighSpeedAttack() {
         
         if (eventCount >= totalEvents) {
             clearInterval(attackInterval);
-            
+
             console.log(`✅ Attack simulation complete: ${eventCount} events sent in ${durationMs}ms`);
             if (!DEMO_MODE) {
-                showNotification(
-                    `Attack simulation complete! ${eventCount} events sent. Check dashboard for threat fingerprints.`,
-                    "warning"
-                );
+            showNotification(
+                `Attack simulation complete! ${eventCount} events sent. Check dashboard for threat fingerprints.`,
+                "warning"
+            );
             } else {
                 console.log(`[DEMO_NOTIFICATION_SUPPRESSED] Attack simulation complete! ${eventCount} events sent. Check dashboard for threat fingerprints.`);
             }
-        }
+}
     }, intervalMs);
     
     // Also send a burst at the end for extra intensity
@@ -361,7 +361,7 @@ if (typeof window !== "undefined") {
         setupKeyboardShortcut();
     }
     
-    window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
         const platform = getCurrentPlatform();
         console.log(`📍 Platform detected: ${platform}`);
         
