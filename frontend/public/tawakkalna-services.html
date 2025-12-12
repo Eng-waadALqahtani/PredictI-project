@@ -297,6 +297,65 @@
     </main>
 
     <script>
+        // Show blocking overlay
+        function showBlockOverlay(message) {
+            let overlay = document.getElementById('block-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'block-overlay';
+                overlay.style.cssText = `
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                `;
+                overlay.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+                        <h3 style="color: #c92a2a; font-size: 24px; margin-bottom: 15px;">تم حجب دخولك</h3>
+                        <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                            ${message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.'}
+                        </p>
+                        <button onclick="window.location.href='/hub.html'" 
+                                style="margin-top: 25px; padding: 12px 30px; background: #009688; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            العودة للصفحة الرئيسية
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            overlay.style.display = 'flex';
+        }
+
+        // Check if user is blocked on page load
+        async function checkIfBlocked() {
+            try {
+                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                if (!userId) return;
+
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+
+                if (response.status === 403) {
+                    const result = await response.json();
+                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
+                }
+            } catch (error) {
+                console.error('Error checking block status:', error);
+            }
+        }
+
+        // Check on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkIfBlocked, 500);
+        });
+
         // Family Record Download
         function downloadFamilyRecord() {
             try {

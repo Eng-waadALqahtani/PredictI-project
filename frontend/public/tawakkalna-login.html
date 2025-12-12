@@ -290,6 +290,80 @@
     </main>
 
     <script>
+        // Show blocking overlay (full-screen modal)
+        function showBlockOverlay(message) {
+            let overlay = document.getElementById('block-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'block-overlay';
+                overlay.style.cssText = `
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                `;
+                overlay.innerHTML = `
+                    <div style="background: white; padding: 40px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin: 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+                        <h3 style="color: #c92a2a; font-size: 24px; margin-bottom: 15px;">تم حجب دخولك</h3>
+                        <p id="block-message" style="color: #666; font-size: 16px; line-height: 1.6;">
+                            ${message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.'}
+                        </p>
+                        <button onclick="hideBlockOverlay()" 
+                                style="margin-top: 25px; padding: 12px 30px; background: #009688; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            فهمت
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+            }
+            
+            const msgElement = document.getElementById('block-message');
+            if (msgElement) {
+                msgElement.textContent = message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.';
+            }
+            
+            overlay.style.display = 'flex';
+        }
+
+        function hideBlockOverlay() {
+            const overlay = document.getElementById('block-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
+        // Check if user is blocked
+        async function checkIfBlocked(userId) {
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+
+                if (response.status === 403) {
+                    const result = await response.json();
+                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
+                    try {
+                        if (typeof sendEvent === 'function') {
+                            sendEvent('check_blocked', null, { page: 'tawakkalna-login' });
+                        }
+                    } catch (e) {
+                        console.error("Error sending check_blocked event:", e);
+                    }
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error checking block status:', error);
+                return false;
+            }
+        }
+
         async function handleLogin(event) {
             event.preventDefault();
             
@@ -301,7 +375,10 @@
                 return;
             }
 
-            // Send login events using events.js
+            // Get user ID from events.js
+            const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : idNumber;
+
+            // Send login_attempt event
             try {
                 if (typeof sendEvent === 'function') {
                     sendEvent("login_attempt", null, { page: "tawakkalna-login" });
@@ -310,26 +387,63 @@
                 console.error("Error sending login_attempt event:", e);
             }
 
-            // Show success message
-            const successMessage = document.getElementById('successMessage');
-            successMessage.classList.add('show');
+            // Check if user is blocked before proceeding
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId })
+                });
 
-            // Send login_success event after a short delay
-            setTimeout(() => {
-                try {
-                    if (typeof sendEvent === 'function') {
-                        sendEvent("login_success", null, { page: "tawakkalna-login" });
+                if (response.status === 403) {
+                    // User is blocked
+                    const result = await response.json();
+                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
+                    try {
+                        if (typeof sendEvent === 'function') {
+                            sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint', page: 'tawakkalna-login' });
+                        }
+                    } catch (e) {
+                        console.error("Error sending login_blocked event:", e);
                     }
-                } catch (e) {
-                    console.error("Error sending login_success event:", e);
+                    return;
                 }
-            }, 300);
 
-            // Redirect to services page after 1.2 seconds
-            setTimeout(() => {
-                window.location.href = "/tawakkalna-services.html";
-            }, 1200);
+                // User is not blocked - proceed with login
+                const successMessage = document.getElementById('successMessage');
+                successMessage.classList.add('show');
+
+                // Send login_success event
+                setTimeout(() => {
+                    try {
+                        if (typeof sendEvent === 'function') {
+                            sendEvent("login_success", null, { page: "tawakkalna-login" });
+                        }
+                    } catch (e) {
+                        console.error("Error sending login_success event:", e);
+                    }
+                }, 300);
+
+                // Redirect to services page after 1.2 seconds
+                setTimeout(() => {
+                    window.location.href = "/tawakkalna-services.html";
+                }, 1200);
+
+            } catch (error) {
+                console.error('Error during login check:', error);
+                alert('حدث خطأ أثناء الاتصال بالخادم');
+            }
         }
+
+        // Check block status on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                if (userId) {
+                    checkIfBlocked(userId);
+                }
+            }, 500);
+        });
     </script>
 </body>
 </html>
