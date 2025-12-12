@@ -432,7 +432,7 @@ def is_user_fingerprinted(user_id: str) -> bool:
     try:
         db_fingerprints = session.query(FingerprintDB).filter(
             FingerprintDB.user_id == user_id,
-            FingerprintDB.status == "ACTIVE",
+            FingerprintDB.status == "BLOCKED",
             FingerprintDB.risk_score >= RISK_SCORE_BLOCKING_THRESHOLD
         ).all()
         
@@ -1110,7 +1110,7 @@ def process_event(event: Event) -> Optional[ThreatFingerprint]:
             fingerprint_id=f"fp-{uuid.uuid4().hex[:12]}",
             risk_score=risk_score,
             user_id=event.user_id,
-            status="ACTIVE",
+            status="PENDING",
             behavioral_features=behavioral_features,
             device_id=event.device_id,
             ip_address=getattr(event, "ip_address", None),

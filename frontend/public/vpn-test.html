@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار خاصية VPN / القفزة الجغرافية - PredictIQ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-right: 4px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .test-section p {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-right: 4px solid #667eea;
+            background: #f8f9fa;
+        }
+        
+        .result-item.success {
+            border-right-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .result-item.error {
+            border-right-color: #dc3545;
+            background: #f8d7da;
+        }
+        
+        .result-item.warning {
+            border-right-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        
+        .status-indicator.running {
+            background: #ffc107;
+            animation: pulse 1s infinite;
+        }
+        
+        .status-indicator.success {
+            background: #28a745;
+        }
+        
+        .status-indicator.error {
+            background: #dc3545;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-right: 4px solid #2196F3;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .info-box strong {
+            color: #1976D2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 اختبار خاصية VPN / القفزة الجغرافية</h1>
+        <p class="subtitle">PredictIQ - Geographic Jump Detection Testing Tool</p>
+        
+        <div class="info-box">
+            <strong>📌 ملاحظة:</strong> هذا الاختبار يرسل events من مواقع مختلفة لمحاكاة استخدام VPN أو تبديل المواقع الجغرافية بسرعة.
+        </div>
+        
+        <!-- Test Configuration -->
+        <div class="test-section">
+            <h2>⚙️ إعدادات الاختبار</h2>
+            <div class="input-group">
+                <label>User ID:</label>
+                <input type="text" id="userId" value="user-8456123848" placeholder="user-8456123848">
+            </div>
+            <div class="input-group">
+                <label>Device ID:</label>
+                <input type="text" id="deviceId" value="device-demo-01" placeholder="device-demo-01">
+            </div>
+            <div class="input-group">
+                <label>API Base URL:</label>
+                <input type="text" id="apiBase" value="http://localhost:5000" placeholder="http://localhost:5000">
+            </div>
+        </div>
+        
+        <!-- Quick Test -->
+        <div class="test-section">
+            <h2>🚀 اختبار سريع (3 مواقع مختلفة)</h2>
+            <p>يرسل 3 events متتالية من مواقع مختلفة (الرياض، جدة، الدمام) لمحاكاة VPN hopping</p>
+            <button onclick="runQuickTest()">▶️ تشغيل الاختبار السريع</button>
+        </div>
+        
+        <!-- Impossible Travel Test -->
+        <div class="test-section">
+            <h2>⚡ اختبار التنقل المستحيل</h2>
+            <p>يرسل event من الرياض ثم من أبها بعد 5 دقائق فقط (سرعة مستحيلة > 900 كم/ساعة)</p>
+            <button onclick="runImpossibleTravelTest()">▶️ تشغيل اختبار التنقل المستحيل</button>
+        </div>
+        
+        <!-- Custom Test -->
+        <div class="test-section">
+            <h2>🎯 اختبار مخصص</h2>
+            <div class="input-group">
+                <label>الموقع الأول:</label>
+                <select id="location1">
+                    <option value="Riyadh">الرياض</option>
+                    <option value="Jeddah">جدة</option>
+                    <option value="Dammam">الدمام</option>
+                    <option value="Abha">أبها</option>
+                    <option value="Mecca">مكة</option>
+                    <option value="Medina">المدينة</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>الموقع الثاني:</label>
+                <select id="location2">
+                    <option value="Jeddah">جدة</option>
+                    <option value="Riyadh">الرياض</option>
+                    <option value="Dammam">الدمام</option>
+                    <option value="Abha">أبها</option>
+                    <option value="Mecca">مكة</option>
+                    <option value="Medina">المدينة</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>الموقع الثالث:</label>
+                <select id="location3">
+                    <option value="Dammam">الدمام</option>
+                    <option value="Riyadh">الرياض</option>
+                    <option value="Jeddah">جدة</option>
+                    <option value="Abha">أبها</option>
+                    <option value="Mecca">مكة</option>
+                    <option value="Medina">المدينة</option>
+                </select>
+            </div>
+            <button onclick="runCustomTest()" class="btn-success">▶️ تشغيل الاختبار المخصص</button>
+        </div>
+        
+        <!-- Clear Results -->
+        <div class="test-section">
+            <h2>🗑️ إدارة النتائج</h2>
+            <button onclick="clearResults()" class="btn-danger">مسح النتائج</button>
+            <button onclick="checkDashboard()" class="btn-success">فحص Dashboard</button>
+        </div>
+        
+        <!-- Results -->
+        <div class="results" id="results">
+            <div class="result-item">
+                <strong>📊 النتائج ستظهر هنا...</strong><br>
+                <small>قم بتشغيل أي اختبار لرؤية النتائج</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.API_BASE || 'http://localhost:5000';
+        
+        function getUserId() {
+            return document.getElementById('userId').value || 'user-8456123848';
+        }
+        
+        function getDeviceId() {
+            return document.getElementById('deviceId').value || 'device-demo-01';
+        }
+        
+        function getApiBase() {
+            return document.getElementById('apiBase').value || 'http://localhost:5000';
+        }
+        
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const resultItem = document.createElement('div');
+            resultItem.className = `result-item ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            resultItem.innerHTML = `
+                <strong>${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'} ${message}</strong>
+                <br><small>${timestamp}</small>
+            `;
+            
+            results.insertBefore(resultItem, results.firstChild);
+        }
+        
+        async function sendEvent(eventType, location, ip, serviceName = null) {
+            const apiBase = getApiBase();
+            const userId = getUserId();
+            const deviceId = getDeviceId();
+            
+            const payload = {
+                event_type: eventType,
+                user_id: userId,
+                device_id: deviceId,
+                location: location,
+                ip_address: ip,
+                timestamp1: new Date().toISOString()
+            };
+            
+            if (serviceName) {
+                payload.service_name = serviceName;
+            }
+            
+            try {
+                const response = await fetch(`${apiBase}/api/v1/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    addResult(
+                        `Event من ${location} (${ip}) - Risk Score: ${result.risk_score || 'N/A'}`,
+                        result.risk_score >= 80 ? 'warning' : 'success'
+                    );
+                    
+                    if (result.fingerprint_generated) {
+                        addResult(`🚨 تم إنشاء بصمة تهديد! ID: ${result.fingerprint_id}`, 'warning');
+                    }
+                    
+                    return result;
+                } else {
+                    addResult(`خطأ: ${result.message || 'Unknown error'}`, 'error');
+                    return null;
+                }
+            } catch (error) {
+                addResult(`❌ خطأ في الاتصال: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        async function runQuickTest() {
+            addResult('🚀 بدء الاختبار السريع...', 'info');
+            
+            const locations = ['Riyadh', 'Jeddah', 'Dammam'];
+            const ips = ['192.168.1.100', '192.168.1.101', '192.168.1.102'];
+            const events = ['login_attempt', 'view_service', 'download_file'];
+            const services = [null, 'vehicle_authorization', 'national_id'];
+            
+            for (let i = 0; i < 3; i++) {
+                await sendEvent(events[i], locations[i], ips[i], services[i]);
+                if (i < 2) {
+                    await new Promise(resolve => setTimeout(resolve, 1500)); // انتظر 1.5 ثانية
+                }
+            }
+            
+            addResult('✅ اكتمل الاختبار السريع! تحقق من Dashboard', 'success');
+        }
+        
+        async function runImpossibleTravelTest() {
+            addResult('⚡ بدء اختبار التنقل المستحيل...', 'info');
+            
+            // Event 1: من الرياض في الوقت الحالي
+            const now = new Date();
+            await sendEvent('login_attempt', 'Riyadh', '192.168.1.100');
+            
+            addResult('⏳ انتظار 2 ثانية قبل Event الثاني...', 'info');
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Event 2: من أبها بعد 5 دقائق (لكن في الواقع بعد ثانيتين فقط)
+            // سنستخدم timestamp مختلف لاختبار التنقل المستحيل
+            const apiBase = getApiBase();
+            const userId = getUserId();
+            const deviceId = getDeviceId();
+            
+            const event2 = {
+                event_type: 'download_file',
+                user_id: userId,
+                device_id: deviceId,
+                location: 'Abha',
+                ip_address: '192.168.1.101',
+                timestamp1: new Date(now.getTime() + 5 * 60 * 1000).toISOString() // 5 دقائق بعد Event 1
+            };
+            
+            try {
+                const response = await fetch(`${apiBase}/api/v1/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(event2)
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    addResult(`Event 2 من Abha - Risk Score: ${result.risk_score || 'N/A'}`, 'warning');
+                }
+            } catch (error) {
+                addResult(`❌ خطأ: ${error.message}`, 'error');
+            }
+            
+            addResult('✅ اكتمل اختبار التنقل المستحيل!', 'success');
+        }
+        
+        async function runCustomTest() {
+            addResult('🎯 بدء الاختبار المخصص...', 'info');
+            
+            const location1 = document.getElementById('location1').value;
+            const location2 = document.getElementById('location2').value;
+            const location3 = document.getElementById('location3').value;
+            
+            const locations = [location1, location2, location3];
+            const ips = ['192.168.1.200', '192.168.1.201', '192.168.1.202'];
+            const events = ['login_attempt', 'view_service', 'download_file'];
+            const services = [null, 'vehicle_authorization', 'national_id'];
+            
+            for (let i = 0; i < 3; i++) {
+                await sendEvent(events[i], locations[i], ips[i], services[i]);
+                if (i < 2) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+            }
+            
+            addResult('✅ اكتمل الاختبار المخصص!', 'success');
+        }
+        
+        function clearResults() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<div class="result-item"><strong>📊 النتائج تم مسحها</strong></div>';
+        }
+        
+        function checkDashboard() {
+            const apiBase = getApiBase();
+            window.open(`${apiBase}/dashboard.html`, '_blank');
+        }
+    </script>
+</body>
+</html>
+

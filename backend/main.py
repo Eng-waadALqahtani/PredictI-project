@@ -408,6 +408,12 @@ def database_view():
     return app.send_static_file('database-view.html')
 
 
+@app.route('/vpn-test.html')
+def vpn_test():
+    """Serve the VPN/Geographic Jump Testing page"""
+    return app.send_static_file('vpn-test.html')
+
+
 @app.route('/api/v1/database-stats', methods=['GET'])
 def get_database_stats():
     """

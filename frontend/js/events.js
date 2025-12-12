@@ -28,18 +28,50 @@ const API_BASE = window.API_BASE || (window.location.hostname.includes("render")
 const DEMO_MODE = true;
 
 // ============================================================================
-// DEMO USER/DEVICE IDs (Fixed for demo consistency)
+// USER/DEVICE ID GENERATION
 // ============================================================================
 
-const DEMO_USER_ID = "user-8456123848";     // Fixed ID for demo
-const DEMO_DEVICE_ID = "device-demo-01";    // Fixed ID for demo
+const DEMO_USER_ID = "user-8456123848";     // Fixed ID for demo (can be changed later)
+
+// ============================================================================
+// DEVICE ID GENERATION
+// ============================================================================
+
+/**
+ * Generate or retrieve a unique device ID for this browser/device
+ * The ID is stored in localStorage and persists across sessions
+ */
+function getOrGenerateDeviceId() {
+    const STORAGE_KEY = 'predictiq_device_id';
+    
+    // Try to get stored device ID from localStorage
+    let deviceId = localStorage.getItem(STORAGE_KEY);
+    
+    // If not found, generate a new unique ID
+    if (!deviceId) {
+        // Generate a random unique identifier
+        const uniquePart = Math.random().toString(36).substring(2, 15) + 
+                          Math.random().toString(36).substring(2, 15);
+        
+        // Detect device type for prefix
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const prefix = isMobile ? 'mobile' : 'desktop';
+        
+        deviceId = `${prefix}-${uniquePart}`;
+        localStorage.setItem(STORAGE_KEY, deviceId);
+        
+        console.log(`📱 [DEVICE ID] Generated new device ID: ${deviceId}`);
+    }
+    
+    return deviceId;
+}
 
 function getCurrentUserId() {
     return DEMO_USER_ID;
 }
 
 function getCurrentDeviceId() {
-    return DEMO_DEVICE_ID;
+    return getOrGenerateDeviceId();
 }
 
 function getCurrentPlatform() {
@@ -53,7 +85,7 @@ function getCurrentPlatform() {
 // Debug: Log that events.js is loaded
 console.log("✅ events.js loaded - Centralized event tracking active");
 console.log(`   Demo User ID: ${DEMO_USER_ID}`);
-console.log(`   Demo Device ID: ${DEMO_DEVICE_ID}`);
+console.log(`   Device ID: ${getCurrentDeviceId()}`);
 
 // ============================================================================
 // GENERIC SEND EVENT HELPER
