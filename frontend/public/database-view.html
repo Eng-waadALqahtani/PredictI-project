@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض قاعدة البيانات - PredictIQ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', 'Tahoma', 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        header h1 {
+            color: #1E40AF;
+            font-size: 32px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-button {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+
+        .back-button:hover {
+            background: #5568d3;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .stat-card .value {
+            color: #1E40AF;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .stat-card.high-risk .value {
+            color: #dc2626;
+        }
+
+        .stat-card.medium-risk .value {
+            color: #f59e0b;
+        }
+
+        .stat-card.low-risk .value {
+            color: #10b981;
+        }
+
+        .main-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .section-title {
+            color: #1E40AF;
+            font-size: 24px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .fingerprints-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .fingerprints-table th {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            text-align: right;
+            font-weight: 600;
+            border: none;
+        }
+
+        .fingerprints-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .fingerprints-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .risk-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .risk-high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .risk-medium {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .risk-low {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-blocked {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-cleared {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .features-preview {
+            font-size: 12px;
+            color: #666;
+            max-width: 300px;
+        }
+
+        .refresh-button {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .refresh-button:hover {
+            background: #059669;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span>🗄️</span>
+                عرض قاعدة البيانات - PredictIQ
+            </h1>
+            <a href="/hub.html" class="back-button">← العودة للصفحة الرئيسية</a>
+        </header>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3>إجمالي البصمات</h3>
+                <div class="value" id="totalFingerprints">-</div>
+                <div class="label">بصمة مكتشفة</div>
+            </div>
+            <div class="stat-card status-active">
+                <h3>البصمات النشطة</h3>
+                <div class="value" id="activeFingerprints">-</div>
+                <div class="label">حالة: ACTIVE</div>
+            </div>
+            <div class="stat-card status-blocked">
+                <h3>البصمات المحظورة</h3>
+                <div class="value" id="blockedFingerprints">-</div>
+                <div class="label">حالة: BLOCKED</div>
+            </div>
+            <div class="stat-card high-risk">
+                <h3>عالية الخطورة</h3>
+                <div class="value" id="highRisk">-</div>
+                <div class="label">درجة خطورة ≥ 80</div>
+            </div>
+            <div class="stat-card medium-risk">
+                <h3>متوسطة الخطورة</h3>
+                <div class="value" id="mediumRisk">-</div>
+                <div class="label">درجة خطورة 50-79</div>
+            </div>
+            <div class="stat-card low-risk">
+                <h3>منخفضة الخطورة</h3>
+                <div class="value" id="lowRisk">-</div>
+                <div class="label">درجة خطورة &lt; 50</div>
+            </div>
+            <div class="stat-card">
+                <h3>متوسط درجة الخطر</h3>
+                <div class="value" id="avgRisk">-</div>
+                <div class="label">من 100</div>
+            </div>
+            <div class="stat-card">
+                <h3>المستخدمون الفريدون</h3>
+                <div class="value" id="uniqueUsers">-</div>
+                <div class="label">مستخدم مختلف</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 class="section-title">جميع البصمات في قاعدة البيانات</h2>
+                <button class="refresh-button" onclick="loadAllData()">🔄 تحديث البيانات</button>
+            </div>
+
+            <div id="loadingMessage" class="loading">
+                ⏳ جاري تحميل البيانات...
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-state-icon">📭</div>
+                <h3>لا توجد بصمات في قاعدة البيانات</h3>
+                <p>سيتم عرض البصمات هنا عندما يتم اكتشاف تهديدات</p>
+            </div>
+
+            <table class="fingerprints-table" id="fingerprintsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>🆔 معرف البصمة</th>
+                        <th>👤 المستخدم</th>
+                        <th>⚠️ درجة الخطر</th>
+                        <th>📊 الحالة</th>
+                        <th>📱 الجهاز</th>
+                        <th>🌐 IP</th>
+                        <th>📈 الخصائص السلوكية</th>
+                        <th>📅 تاريخ الإنشاء</th>
+                    </tr>
+                </thead>
+                <tbody id="fingerprintsTbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = `${window.location.protocol}//${window.location.hostname}:5000`;
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/database-stats`);
+                if (!response.ok) throw new Error('Failed to load statistics');
+                
+                const data = await response.json();
+                const stats = data.statistics;
+
+                document.getElementById('totalFingerprints').textContent = stats.total_fingerprints;
+                document.getElementById('activeFingerprints').textContent = stats.by_status.active;
+                document.getElementById('blockedFingerprints').textContent = stats.by_status.blocked;
+                document.getElementById('highRisk').textContent = stats.by_risk_level.high;
+                document.getElementById('mediumRisk').textContent = stats.by_risk_level.medium;
+                document.getElementById('lowRisk').textContent = stats.by_risk_level.low;
+                document.getElementById('avgRisk').textContent = stats.average_risk_score;
+                document.getElementById('uniqueUsers').textContent = stats.unique_users;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        async function loadFingerprints() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            const emptyState = document.getElementById('emptyState');
+            const table = document.getElementById('fingerprintsTable');
+            const tbody = document.getElementById('fingerprintsTbody');
+
+            loadingMessage.style.display = 'block';
+            emptyState.style.display = 'none';
+            table.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/fingerprints`);
+                if (!response.ok) throw new Error('Failed to load fingerprints');
+
+                const fingerprints = await response.json();
+                loadingMessage.style.display = 'none';
+
+                if (fingerprints.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    table.style.display = 'table';
+                    tbody.innerHTML = '';
+
+                    fingerprints.forEach(fp => {
+                        const tr = document.createElement('tr');
+                        
+                        // Risk badge
+                        let riskClass = 'risk-low';
+                        if (fp.risk_score >= 80) riskClass = 'risk-high';
+                        else if (fp.risk_score >= 50) riskClass = 'risk-medium';
+
+                        // Status badge
+                        let statusClass = 'status-active';
+                        if (fp.status === 'BLOCKED') statusClass = 'status-blocked';
+                        else if (fp.status === 'CLEARED') statusClass = 'status-cleared';
+
+                        // Format behavioral features
+                        let featuresHtml = '-';
+                        if (fp.behavioral_features && Object.keys(fp.behavioral_features).length > 0) {
+                            const features = [];
+                            if (fp.behavioral_features.total_events) features.push(`الأحداث: ${fp.behavioral_features.total_events}`);
+                            if (fp.behavioral_features.events_per_minute) features.push(`/دقيقة: ${fp.behavioral_features.events_per_minute}`);
+                            if (fp.behavioral_features.update_mobile_attempt_count) features.push(`محاولات تحديث: ${fp.behavioral_features.update_mobile_attempt_count}`);
+                            featuresHtml = features.slice(0, 2).join(', ') + (features.length > 2 ? '...' : '');
+                        }
+
+                        // Format date
+                        const createdDate = fp.created_at ? new Date(fp.created_at).toLocaleDateString('ar-SA') : '-';
+
+                        tr.innerHTML = `
+                            <td><code style="font-size: 12px;">${fp.fingerprint_id.substring(0, 16)}...</code></td>
+                            <td>${fp.user_id || '-'}</td>
+                            <td><span class="risk-badge ${riskClass}">${fp.risk_score}</span></td>
+                            <td><span class="status-badge ${statusClass}">${fp.status}</span></td>
+                            <td style="font-size: 12px;">${fp.device_id ? fp.device_id.substring(0, 20) + '...' : '-'}</td>
+                            <td style="font-size: 12px;">${fp.ip_address || '-'}</td>
+                            <td class="features-preview">${featuresHtml}</td>
+                            <td class="timestamp">${createdDate}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading fingerprints:', error);
+                loadingMessage.innerHTML = '❌ خطأ في تحميل البيانات';
+            }
+        }
+
+        async function loadAllData() {
+            await Promise.all([loadStatistics(), loadFingerprints()]);
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAllData();
+        });
+    </script>
+</body>
+</html>
+

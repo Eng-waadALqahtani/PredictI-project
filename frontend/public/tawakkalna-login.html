@@ -244,7 +244,6 @@
         </div>
         <div class="left">
             <a href="/hub.html" class="home-link">🏠 الصفحة الرئيسية</a>
-            <span class="badge">PredictIQ Demo</span>
         </div>
     </header>
 
@@ -356,6 +355,9 @@
                         console.error("Error sending check_blocked event:", e);
                     }
                     return true;
+                } else if (response.ok) {
+                    // User is not blocked - hide overlay
+                    hideBlockOverlay();
                 }
                 return false;
             } catch (error) {
@@ -363,6 +365,79 @@
                 return false;
             }
         }
+
+        // Recheck block status (called after unblocking)
+        async function recheckBlockStatus(userId) {
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+
+                if (response.status === 403) {
+                    // Still blocked
+                    const result = await response.json();
+                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
+                } else if (response.ok) {
+                    // Unblocked - hide overlay
+                    hideBlockOverlay();
+                    console.log('[TAWAKKALNA] User unblocked - overlay hidden');
+                }
+            } catch (error) {
+                console.error('Error rechecking block status:', error);
+            }
+        }
+
+        // Polling for block status changes (every 3 seconds)
+        let blockStatusCheckInterval = null;
+        let currentPollingUserId = null;
+
+        function startBlockStatusPolling(userId) {
+            // Stop any previous polling
+            if (blockStatusCheckInterval) {
+                clearInterval(blockStatusCheckInterval);
+            }
+
+            // Save current user_id
+            currentPollingUserId = userId;
+
+            console.log(`[TAWAKKALNA] Starting polling for user_id: ${userId}`);
+
+            // Check every 3 seconds
+            blockStatusCheckInterval = setInterval(() => {
+                const userIdToCheck = currentPollingUserId ||
+                                     (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                                     localStorage.getItem('user_id');
+
+                if (userIdToCheck) {
+                    recheckBlockStatus(userIdToCheck);
+                }
+            }, 3000);
+        }
+
+        function stopBlockStatusPolling() {
+            if (blockStatusCheckInterval) {
+                clearInterval(blockStatusCheckInterval);
+                blockStatusCheckInterval = null;
+                currentPollingUserId = null;
+                console.log('[TAWAKKALNA] Stopped polling');
+            }
+        }
+
+        // Listen to localStorage changes (from Dashboard)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'fingerprint_updated') {
+                console.log('[TAWAKKALNA] Received fingerprint_updated event from Dashboard (cross-window)');
+                const userId = currentPollingUserId ||
+                              (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                              localStorage.getItem('user_id');
+                if (userId) {
+                    console.log(`[TAWAKKALNA] Rechecking block status for user_id: ${userId}`);
+                    recheckBlockStatus(userId);
+                }
+            }
+        });
 
         async function handleLogin(event) {
             event.preventDefault();
@@ -441,8 +516,18 @@
                 const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
                 if (userId) {
                     checkIfBlocked(userId);
+                    // Start polling for block status changes
+                    startBlockStatusPolling(userId);
+                    console.log(`[TAWAKKALNA] Started polling for user_id: ${userId}`);
+                } else {
+                    console.warn('[TAWAKKALNA] No user_id found - cannot check block status');
                 }
             }, 500);
+        });
+
+        // Stop polling when page is closed
+        window.addEventListener('beforeunload', () => {
+            stopBlockStatusPolling();
         });
     </script>
 </body>

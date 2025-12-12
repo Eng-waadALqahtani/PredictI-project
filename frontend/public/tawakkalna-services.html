@@ -330,6 +330,13 @@
             overlay.style.display = 'flex';
         }
 
+        function hideBlockOverlay() {
+            const overlay = document.getElementById('block-overlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
         // Check if user is blocked on page load
         async function checkIfBlocked() {
             try {
@@ -345,15 +352,103 @@
                 if (response.status === 403) {
                     const result = await response.json();
                     showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
+                } else if (response.ok) {
+                    hideBlockOverlay();
                 }
             } catch (error) {
                 console.error('Error checking block status:', error);
             }
         }
 
+        // Recheck block status (called after unblocking)
+        async function recheckBlockStatus(userId) {
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+
+                if (response.status === 403) {
+                    // Still blocked
+                    const result = await response.json();
+                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
+                } else if (response.ok) {
+                    // Unblocked - hide overlay
+                    hideBlockOverlay();
+                    console.log('[TAWAKKALNA-SERVICES] User unblocked - overlay hidden');
+                }
+            } catch (error) {
+                console.error('Error rechecking block status:', error);
+            }
+        }
+
+        // Polling for block status changes (every 3 seconds)
+        let blockStatusCheckInterval = null;
+        let currentPollingUserId = null;
+
+        function startBlockStatusPolling(userId) {
+            // Stop any previous polling
+            if (blockStatusCheckInterval) {
+                clearInterval(blockStatusCheckInterval);
+            }
+
+            // Save current user_id
+            currentPollingUserId = userId;
+
+            console.log(`[TAWAKKALNA-SERVICES] Starting polling for user_id: ${userId}`);
+
+            // Check every 3 seconds
+            blockStatusCheckInterval = setInterval(() => {
+                const userIdToCheck = currentPollingUserId ||
+                                     (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                                     localStorage.getItem('user_id');
+
+                if (userIdToCheck) {
+                    recheckBlockStatus(userIdToCheck);
+                }
+            }, 3000);
+        }
+
+        function stopBlockStatusPolling() {
+            if (blockStatusCheckInterval) {
+                clearInterval(blockStatusCheckInterval);
+                blockStatusCheckInterval = null;
+                currentPollingUserId = null;
+                console.log('[TAWAKKALNA-SERVICES] Stopped polling');
+            }
+        }
+
+        // Listen to localStorage changes (from Dashboard)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'fingerprint_updated') {
+                console.log('[TAWAKKALNA-SERVICES] Received fingerprint_updated event from Dashboard (cross-window)');
+                const userId = currentPollingUserId ||
+                              (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                              localStorage.getItem('user_id');
+                if (userId) {
+                    console.log(`[TAWAKKALNA-SERVICES] Rechecking block status for user_id: ${userId}`);
+                    recheckBlockStatus(userId);
+                }
+            }
+        });
+
         // Check on page load
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(checkIfBlocked, 500);
+            setTimeout(() => {
+                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
+                if (userId) {
+                    checkIfBlocked();
+                    // Start polling for block status changes
+                    startBlockStatusPolling(userId);
+                    console.log(`[TAWAKKALNA-SERVICES] Started polling for user_id: ${userId}`);
+                }
+            }, 500);
+        });
+
+        // Stop polling when page is closed
+        window.addEventListener('beforeunload', () => {
+            stopBlockStatusPolling();
         });
 
         // Family Record Download

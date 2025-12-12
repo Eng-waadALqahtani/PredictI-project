@@ -353,6 +353,83 @@ def hub():
     return app.send_static_file('hub.html')
 
 
+@app.route('/database-view.html')
+def database_view():
+    """Serve the Database View page for judges"""
+    return app.send_static_file('database-view.html')
+
+
+@app.route('/api/v1/database-stats', methods=['GET'])
+def get_database_stats():
+    """
+    Get comprehensive database statistics for the judges panel.
+    Returns statistics about fingerprints, risk scores, and statuses.
+    """
+    from db import get_db_session, FingerprintDB
+    from sqlalchemy import func
+    
+    try:
+        session = get_db_session()
+        
+        # Total counts
+        total = session.query(FingerprintDB).count()
+        active = session.query(FingerprintDB).filter(FingerprintDB.status == "ACTIVE").count()
+        blocked = session.query(FingerprintDB).filter(FingerprintDB.status == "BLOCKED").count()
+        cleared = session.query(FingerprintDB).filter(FingerprintDB.status == "CLEARED").count()
+        
+        # Risk level counts
+        high_risk = session.query(FingerprintDB).filter(FingerprintDB.risk_score >= 80).count()
+        medium_risk = session.query(FingerprintDB).filter(
+            FingerprintDB.risk_score >= 50, 
+            FingerprintDB.risk_score < 80
+        ).count()
+        low_risk = session.query(FingerprintDB).filter(FingerprintDB.risk_score < 50).count()
+        
+        # Average risk score
+        avg_risk = session.query(func.avg(FingerprintDB.risk_score)).scalar() or 0
+        
+        # Unique users and devices
+        unique_users = session.query(func.count(func.distinct(FingerprintDB.user_id))).scalar() or 0
+        unique_devices = session.query(func.count(func.distinct(FingerprintDB.device_id))).filter(
+            FingerprintDB.device_id.isnot(None)
+        ).scalar() or 0
+        unique_ips = session.query(func.count(func.distinct(FingerprintDB.ip_address))).filter(
+            FingerprintDB.ip_address.isnot(None)
+        ).scalar() or 0
+        
+        session.close()
+        
+        return add_cors_headers(jsonify({
+            "status": "ok",
+            "statistics": {
+                "total_fingerprints": total,
+                "by_status": {
+                    "active": active,
+                    "blocked": blocked,
+                    "cleared": cleared
+                },
+                "by_risk_level": {
+                    "high": high_risk,
+                    "medium": medium_risk,
+                    "low": low_risk
+                },
+                "average_risk_score": round(float(avg_risk), 2),
+                "unique_users": unique_users,
+                "unique_devices": unique_devices,
+                "unique_ip_addresses": unique_ips
+            }
+        })), 200
+        
+    except Exception as e:
+        print(f"❌ [ERROR] Error getting database stats: {e}")
+        import traceback
+        traceback.print_exc()
+        return add_cors_headers(jsonify({
+            "status": "error",
+            "message": str(e)
+        })), 500
+
+
 # ==================  Blocking / Unblocking APIs  ==================
 
 @app.route('/api/v1/check-and-login', methods=['POST', 'OPTIONS'])
