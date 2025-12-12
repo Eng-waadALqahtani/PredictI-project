@@ -419,17 +419,45 @@
             }
         }
 
-        // Listen to localStorage changes (from Dashboard)
+        // Listen to localStorage changes (from Dashboard - Cross-tab communication)
         window.addEventListener('storage', function(e) {
             if (e.key === 'fingerprint_updated') {
-                console.log('[TAWAKKALNA-SERVICES] Received fingerprint_updated event from Dashboard (cross-window)');
+                const action = localStorage.getItem('fingerprint_action');
+                const updatedUserId = localStorage.getItem('fingerprint_user_id');
                 const userId = currentPollingUserId ||
                               (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
                               localStorage.getItem('user_id');
-                if (userId) {
-                    console.log(`[TAWAKKALNA-SERVICES] Rechecking block status for user_id: ${userId}`);
+                
+                console.log(`[TAWAKKALNA-SERVICES] Received fingerprint_updated event! Action: ${action}, User: ${updatedUserId}, Current: ${userId}`);
+                
+                // إذا كان الإجراء متعلق بالمستخدم الحالي
+                if (updatedUserId && userId && updatedUserId === userId) {
+                    if (action === 'unblock') {
+                        console.log('[TAWAKKALNA-SERVICES] User was unblocked - immediately rechecking...');
+                        // فحص فوري (لا انتظار polling)
+                        recheckBlockStatus(userId);
+                    } else if (action === 'block') {
+                        console.log('[TAWAKKALNA-SERVICES] User was blocked - immediately checking...');
+                        recheckBlockStatus(userId);
+                    }
+                } else if (userId && !updatedUserId) {
+                    // إذا لم يُحدد المستخدم، نفحص المستخدم الحالي
+                    console.log('[TAWAKKALNA-SERVICES] Generic update - rechecking current user...');
                     recheckBlockStatus(userId);
                 }
+            }
+        });
+        
+        // Listen to same-tab updates (Custom event)
+        window.addEventListener('fingerprintStatusChanged', function(e) {
+            const detail = e.detail;
+            const userId = currentPollingUserId ||
+                          (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
+                          localStorage.getItem('user_id');
+            
+            if (detail.user_id === userId && detail.action === 'unblock') {
+                console.log('[TAWAKKALNA-SERVICES] Same-tab unblock detected - immediately rechecking...');
+                recheckBlockStatus(userId);
             }
         });
 

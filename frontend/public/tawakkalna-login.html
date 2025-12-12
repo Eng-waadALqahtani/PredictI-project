@@ -80,16 +80,6 @@
             box-shadow: 0 4px 8px rgba(0, 150, 136, 0.3);
         }
 
-        .top-bar .left .badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-
         /* Login Card */
         .login-container {
             background: white;
@@ -197,57 +187,31 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            .top-bar {
-                padding: 12px 20px;
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .top-bar .right h1 {
-                font-size: 20px;
-            }
-
-            .top-bar .left {
-                width: 100%;
-                justify-content: space-between;
-            }
-
-            .login-container {
-                padding: 40px 25px;
-                margin-top: 120px;
-            }
-
-            .login-container h2 {
-                font-size: 24px;
-            }
+            .top-bar { padding: 12px 20px; flex-direction: column; gap: 10px; }
+            .top-bar .right h1 { font-size: 20px; }
+            .top-bar .left { width: 100%; justify-content: space-between; }
+            .login-container { padding: 40px 25px; margin-top: 120px; }
+            .login-container h2 { font-size: 24px; }
         }
     </style>
 </head>
 <body>
-    <!-- Top Bar -->
     <header class="top-bar">
         <div class="right">
             <h1>توكلنا – محاكاة الخدمات الحكومية</h1>
             <p>(Digital Threat Fingerprint) نسخة تجريبية لأغراض الأمن السيبراني</p>
         </div>
         <div class="left">
-            <a href="/hub.html" class="home-link">🏠 الصفحة الرئيسية</a>
+            <a href="/index.html" class="home-link">🏠 الصفحة الرئيسية</a>
         </div>
     </header>
 
-    <!-- Login Card -->
     <main class="login-container">
         <h2>تسجيل الدخول</h2>
         <p class="subtitle">أدخل بياناتك التجريبية للوصول إلى المحفظة الرقمية والخدمات الحكومية.</p>
@@ -289,7 +253,7 @@
     </main>
 
     <script>
-        // Show blocking overlay (full-screen modal)
+        // إظهار نافذة الحجب (Overlay)
         function showBlockOverlay(message) {
             let overlay = document.getElementById('block-overlay');
             if (!overlay) {
@@ -299,21 +263,25 @@
                     display: none;
                     position: fixed;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.7);
+                    background: rgba(0, 0, 0, 0.85);
                     align-items: center;
                     justify-content: center;
                     z-index: 9999;
+                    backdrop-filter: blur(5px);
                 `;
                 overlay.innerHTML = `
-                    <div style="background: white; padding: 40px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin: 20px;">
-                        <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
-                        <h3 style="color: #c92a2a; font-size: 24px; margin-bottom: 15px;">تم حجب دخولك</h3>
-                        <p id="block-message" style="color: #666; font-size: 16px; line-height: 1.6;">
+                    <div style="background: white; padding: 40px; border-radius: 16px; max-width: 500px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin: 20px; border: 1px solid #ffcdd2;">
+                        <div style="font-size: 50px; margin-bottom: 20px;">🚫</div>
+                        <h3 style="color: #c62828; font-size: 26px; margin-bottom: 15px; font-weight: 800;">تم حجب دخولك</h3>
+                        <p id="block-message" style="color: #444; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
                             ${message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.'}
                         </p>
-                        <button onclick="hideBlockOverlay()" 
-                                style="margin-top: 25px; padding: 12px 30px; background: #009688; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                            فهمت
+                        <div style="font-size: 13px; color: #777; margin-bottom: 25px;">
+                            يرجى الانتظار حتى يقوم المسؤول بمراجعة حالتك.
+                        </div>
+                        <button onclick="location.reload()" 
+                                style="padding: 12px 30px; background: #c62828; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.3s;">
+                            تحديث الحالة
                         </button>
                     </div>
                 `;
@@ -328,6 +296,7 @@
             overlay.style.display = 'flex';
         }
 
+        // إخفاء نافذة الحجب
         function hideBlockOverlay() {
             const overlay = document.getElementById('block-overlay');
             if (overlay) {
@@ -335,10 +304,15 @@
             }
         }
 
-        // Check if user is blocked
+        // دالة التحقق من حالة الحجب
         async function checkIfBlocked(userId) {
+            if (!userId) return false;
+            
             try {
-                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                // نستخدم localhost:5000 كافتراضي، أو يمكنك تعديله
+                const apiBase = window.API_BASE || 'http://localhost:5000';
+                
+                const response = await fetch(`${apiBase}/api/v1/check-and-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, precheck_only: true })
@@ -346,17 +320,15 @@
 
                 if (response.status === 403) {
                     const result = await response.json();
-                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
-                    try {
-                        if (typeof sendEvent === 'function') {
-                            sendEvent('check_blocked', null, { page: 'tawakkalna-login' });
-                        }
-                    } catch (e) {
-                        console.error("Error sending check_blocked event:", e);
+                    showBlockOverlay(result.message);
+                    
+                    // إرسال حدث للوحة التحكم (اختياري)
+                    if (typeof sendEvent === 'function') {
+                        try { sendEvent('check_blocked', null, { page: 'tawakkalna-login' }); } catch(e){}
                     }
                     return true;
                 } else if (response.ok) {
-                    // User is not blocked - hide overlay
+                    // المستخدم غير محظور - إخفاء النافذة
                     hideBlockOverlay();
                 }
                 return false;
@@ -366,79 +338,89 @@
             }
         }
 
-        // Recheck block status (called after unblocking)
+        // إعادة التحقق (تستخدم في الـ polling)
         async function recheckBlockStatus(userId) {
-            try {
-                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, precheck_only: true })
-                });
-
-                if (response.status === 403) {
-                    // Still blocked
-                    const result = await response.json();
-                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
-                } else if (response.ok) {
-                    // Unblocked - hide overlay
-                    hideBlockOverlay();
-                    console.log('[TAWAKKALNA] User unblocked - overlay hidden');
-                }
-            } catch (error) {
-                console.error('Error rechecking block status:', error);
-            }
+            await checkIfBlocked(userId);
         }
 
-        // Polling for block status changes (every 3 seconds)
+        // === نظام التحقق المستمر (Polling System) ===
         let blockStatusCheckInterval = null;
-        let currentPollingUserId = null;
 
-        function startBlockStatusPolling(userId) {
-            // Stop any previous polling
+        function startBlockStatusPolling() {
+            // إيقاف أي مؤقت سابق
             if (blockStatusCheckInterval) {
                 clearInterval(blockStatusCheckInterval);
             }
 
-            // Save current user_id
-            currentPollingUserId = userId;
+            console.log(`[TAWAKKALNA] Starting active polling for block status...`);
 
-            console.log(`[TAWAKKALNA] Starting polling for user_id: ${userId}`);
-
-            // Check every 3 seconds
+            // التحقق كل 2.5 ثانية
             blockStatusCheckInterval = setInterval(() => {
-                const userIdToCheck = currentPollingUserId ||
-                                     (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
-                                     localStorage.getItem('user_id');
+                // 1. محاولة جلب الهوية من حقل الإدخال مباشرة (الأكثر دقة أثناء الكتابة)
+                const inputElement = document.getElementById('idNumber');
+                let inputId = inputElement ? inputElement.value.trim() : null;
+                
+                // 2. محاولة الجلب من التخزين المحلي كخيار بديل
+                let storedId = (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) || localStorage.getItem('user_id');
+
+                // نستخدم المعرف الموجود (الأولوية لما هو مكتوب في الحقل إذا كان طويلاً بما يكفي)
+                let userIdToCheck = (inputId && inputId.length > 5) ? inputId : storedId;
 
                 if (userIdToCheck) {
+                    // console.log(`Checking status for: ${userIdToCheck}`);
                     recheckBlockStatus(userIdToCheck);
                 }
-            }, 3000);
+            }, 2500); 
         }
 
         function stopBlockStatusPolling() {
             if (blockStatusCheckInterval) {
                 clearInterval(blockStatusCheckInterval);
                 blockStatusCheckInterval = null;
-                currentPollingUserId = null;
-                console.log('[TAWAKKALNA] Stopped polling');
             }
         }
 
-        // Listen to localStorage changes (from Dashboard)
+        // الاستماع لأحداث Dashboard عبر النوافذ (Cross-tab communication)
         window.addEventListener('storage', function(e) {
             if (e.key === 'fingerprint_updated') {
-                console.log('[TAWAKKALNA] Received fingerprint_updated event from Dashboard (cross-window)');
-                const userId = currentPollingUserId ||
-                              (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) ||
-                              localStorage.getItem('user_id');
-                if (userId) {
-                    console.log(`[TAWAKKALNA] Rechecking block status for user_id: ${userId}`);
-                    recheckBlockStatus(userId);
+                const action = localStorage.getItem('fingerprint_action');
+                const updatedUserId = localStorage.getItem('fingerprint_user_id');
+                const inputId = document.getElementById('idNumber').value.trim();
+                const currentUserId = inputId || localStorage.getItem('user_id');
+                
+                console.log(`[TAWAKKALNA] Detected Dashboard update! Action: ${action}, User: ${updatedUserId}, Current: ${currentUserId}`);
+                
+                // إذا كان الإجراء متعلق بالمستخدم الحالي
+                if (updatedUserId && currentUserId && updatedUserId === currentUserId) {
+                    if (action === 'unblock') {
+                        console.log('[TAWAKKALNA] User was unblocked - immediately rechecking...');
+                        // فحص فوري (لا انتظار polling)
+                        recheckBlockStatus(currentUserId);
+                    } else if (action === 'block') {
+                        console.log('[TAWAKKALNA] User was blocked - immediately checking...');
+                        recheckBlockStatus(currentUserId);
+                    }
+                } else if (currentUserId && !updatedUserId) {
+                    // إذا لم يُحدد المستخدم، نفحص المستخدم الحالي
+                    console.log('[TAWAKKALNA] Generic update - rechecking current user...');
+                    recheckBlockStatus(currentUserId);
                 }
             }
         });
+        
+        // الاستماع لتحديثات نفس التبويب (Custom event)
+        window.addEventListener('fingerprintStatusChanged', function(e) {
+            const detail = e.detail;
+            const inputId = document.getElementById('idNumber').value.trim();
+            const currentUserId = inputId || localStorage.getItem('user_id');
+            
+            if (detail.user_id === currentUserId && detail.action === 'unblock') {
+                console.log('[TAWAKKALNA] Same-tab unblock detected - immediately rechecking...');
+                recheckBlockStatus(currentUserId);
+            }
+        });
 
+        // التعامل مع زر تسجيل الدخول
         async function handleLogin(event) {
             event.preventDefault();
             
@@ -450,56 +432,47 @@
                 return;
             }
 
-            // Get user ID from events.js
-            const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : idNumber;
-
-            // Send login_attempt event
-            try {
-                if (typeof sendEvent === 'function') {
-                    sendEvent("login_attempt", null, { page: "tawakkalna-login" });
-                }
-            } catch (e) {
-                console.error("Error sending login_attempt event:", e);
+            // حفظ المستخدم الحالي
+            if (typeof setUserId === 'function') {
+                setUserId(idNumber);
+            } else {
+                localStorage.setItem('user_id', idNumber);
             }
 
-            // Check if user is blocked before proceeding
+            // إرسال حدث المحاولة
+            if (typeof sendEvent === 'function') {
+                try { sendEvent("login_attempt", null, { page: "tawakkalna-login" }); } catch (e) {}
+            }
+
+            // التحقق النهائي قبل السماح بالدخول
             try {
-                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                const apiBase = window.API_BASE || 'http://localhost:5000';
+                const response = await fetch(`${apiBase}/api/v1/check-and-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId })
+                    body: JSON.stringify({ user_id: idNumber })
                 });
 
                 if (response.status === 403) {
-                    // User is blocked
+                    // محظور
                     const result = await response.json();
-                    showBlockOverlay(result.message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.');
-                    try {
-                        if (typeof sendEvent === 'function') {
-                            sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint', page: 'tawakkalna-login' });
-                        }
-                    } catch (e) {
-                        console.error("Error sending login_blocked event:", e);
+                    showBlockOverlay(result.message);
+                    if (typeof sendEvent === 'function') {
+                        try { sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint' }); } catch(e){}
                     }
                     return;
                 }
 
-                // User is not blocked - proceed with login
+                // مسموح
                 const successMessage = document.getElementById('successMessage');
                 successMessage.classList.add('show');
 
-                // Send login_success event
                 setTimeout(() => {
-                    try {
-                        if (typeof sendEvent === 'function') {
-                            sendEvent("login_success", null, { page: "tawakkalna-login" });
-                        }
-                    } catch (e) {
-                        console.error("Error sending login_success event:", e);
+                    if (typeof sendEvent === 'function') {
+                        try { sendEvent("login_success", null, { page: "tawakkalna-login" }); } catch (e) {}
                     }
                 }, 300);
 
-                // Redirect to services page after 1.2 seconds
                 setTimeout(() => {
                     window.location.href = "/tawakkalna-services.html";
                 }, 1200);
@@ -510,22 +483,19 @@
             }
         }
 
-        // Check block status on page load
+        // عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const userId = typeof getCurrentUserId === 'function' ? getCurrentUserId() : null;
-                if (userId) {
-                    checkIfBlocked(userId);
-                    // Start polling for block status changes
-                    startBlockStatusPolling(userId);
-                    console.log(`[TAWAKKALNA] Started polling for user_id: ${userId}`);
-                } else {
-                    console.warn('[TAWAKKALNA] No user_id found - cannot check block status');
-                }
-            }, 500);
+            // محاولة ملء الحقل إذا كان المستخدم معروفاً سابقاً
+            const savedId = localStorage.getItem('user_id');
+            if (savedId) {
+                document.getElementById('idNumber').value = savedId;
+            }
+
+            // بدء التحقق الدوري فوراً
+            startBlockStatusPolling();
         });
 
-        // Stop polling when page is closed
+        // إيقاف التحقق عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
             stopBlockStatusPolling();
         });

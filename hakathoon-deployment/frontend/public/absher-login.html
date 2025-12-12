@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أبشر - تسجيل الدخول</title>
-    <script src="/js/events.js" defer></script>
+    <script src="../js/events.js" defer></script>
     <style>
         * {
             margin: 0;
@@ -73,23 +73,6 @@
         
         .header-link:hover {
             color: #006b5c;
-        }
-
-        .home-link {
-            background: #006b5c;
-            color: white !important;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .home-link:hover {
-            background: #005a4f;
-            color: white !important;
-        }
-
-        .home-link .icon {
-            color: white !important;
         }
         
         .header-link .icon {
@@ -312,7 +295,6 @@
         .login-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-            background: #ccc;
         }
         
         .new-user-link {
@@ -539,6 +521,23 @@
             transform: scale(0.98);
         }
         
+        .dashboard-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #006b5c;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .dashboard-link:hover {
+            background: #00897b;
+            transform: translateY(-2px);
+        }
+        
         @media (max-width: 768px) {
             .top-header {
                 flex-direction: column;
@@ -563,6 +562,7 @@
     </style>
 </head>
 <body>
+    <!-- Header -->
     <div class="top-header">
         <div class="header-left">
             <div class="vision-logo">
@@ -571,10 +571,6 @@
         </div>
         
         <div class="header-right">
-            <a href="/index.html" class="header-link home-link">
-                <span class="icon">🏠</span>
-                <span>الصفحة الرئيسية</span>
-            </a>
             <a href="#" class="header-link search-link">
                 <span class="icon">🔍</span>
                 <span>ابحث</span>
@@ -598,6 +594,7 @@
         </div>
     </div>
     
+    <!-- Login Screen -->
     <div class="main-container" id="loginScreen">
         <div class="login-section">
             <div class="login-container">
@@ -663,10 +660,11 @@
         </div>
     </div>
     
+    <!-- Services Screen -->
     <div class="services-screen" id="servicesScreen" style="display: none;">
         <div class="services-header">
             <h1>لوحة المعلومات - أبشر</h1>
-            <a href="index.html">← العودة للصفحة الرئيسية</a>
+            <a href="hub.html">← العودة للصفحة الرئيسية</a>
         </div>
         
         <div class="services-container">
@@ -784,7 +782,83 @@
     </div>
     
     <script>
-        // دالة زر إظهار/إخفاء كلمة المرور
+        // API_BASE is defined in events.js - don't redeclare it here
+        // Use window.API_BASE if needed, or rely on events.js
+    
+        // ============================================
+        // UI-BASED ATTACK DETECTION SYSTEM
+        // ============================================
+        
+        // (A) Burst-Click Attack Detection
+        // Array to store login click timestamps
+        const loginClickTimestamps = [];
+        const BURST_ATTACK_THRESHOLD = 3; // 3 or more clicks
+        const BURST_ATTACK_WINDOW = 5000;  // within 5 seconds (5000ms)
+        
+        /**
+         * Records a login button click timestamp and detects burst attacks
+         * @param {string} userId - The user ID attempting login
+         * @returns {boolean} - True if burst attack detected, false otherwise
+         */
+        function detectBurstClickAttack(userId) {
+            const now = Date.now();
+            
+            // Add current click timestamp
+            loginClickTimestamps.push(now);
+            
+            // Remove timestamps older than 5 seconds
+            const recentClicks = loginClickTimestamps.filter(ts => now - ts <= BURST_ATTACK_WINDOW);
+            
+            // Update array to only keep recent clicks
+            loginClickTimestamps.length = 0;
+            loginClickTimestamps.push(...recentClicks);
+            
+            // Check if burst attack detected (3+ clicks in 5 seconds)
+            if (recentClicks.length >= BURST_ATTACK_THRESHOLD) {
+                // Generate suspicious pattern event
+                sendEventToServerSafe('ui_suspicious_pattern', userId, {
+                    burst_attack: true,
+                    click_count: recentClicks.length,
+                    page: 'absher'
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // (B) Long Input Detection
+        /**
+         * Detects suspiciously long username or password inputs
+         * @param {string} username - The username input value
+         * @param {string} password - The password input value
+         * @param {string} userId - The user ID
+         * @returns {boolean} - True if long input detected, false otherwise
+         */
+        function detectLongInput(username, password, userId) {
+            const usernameLength = username ? username.length : 0;
+            const passwordLength = password ? password.length : 0;
+            
+            // Suspicious if username >= 20 OR password >= 32
+            if (usernameLength >= 20 || passwordLength >= 32) {
+                // Generate suspicious pattern event
+                sendEventToServerSafe('ui_suspicious_pattern', userId, {
+                    long_input: true,
+                    username_length: usernameLength,
+                    password_length: passwordLength,
+                    page: 'absher'
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // ============================================
+        // EXISTING FUNCTIONS (UNCHANGED)
+        // ============================================
+        
+        // زر إظهار/إخفاء كلمة المرور
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleButton = document.querySelector('.password-toggle');
@@ -798,61 +872,68 @@
             }
         }
     
-        // إرسال الأحداث بأمان
+        // عند تحميل الصفحة: لو عندي user_id مخزن أشيّك إذا محجوب
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUserId = localStorage.getItem('user_id');
+            if (savedUserId) {
+                checkIfBlocked(savedUserId);
+            }
+        });
+    
+        // Use sendEvent from events.js (centralized event tracking)
         function sendEventToServerSafe(eventType, userId, extra = {}) {
             try {
                 if (typeof sendEvent === "function") {
+                    // sendEvent from events.js handles user_id automatically via getCurrentUserId()
                     sendEvent(eventType, null, extra);
+                } else {
+                    console.warn("sendEvent غير معرّفة (تحققي من events.js)");
                 }
             } catch (e) {
                 console.error("Error sending event:", e);
             }
         }
     
-        // إظهار واجهة الحجب (الرسالة الحمراء داخل الصفحة)
+        // إظهار واجهة الحجب (بدون تفاصيل تهديد)
         function showBlockedUI() {
             const blockedMessage = document.getElementById('blockedMessage');
             const errorMessage = document.getElementById('errorMessage');
             const loginButton = document.getElementById('loginButton');
             
-            if (blockedMessage) blockedMessage.classList.add('show');
-            if (errorMessage) errorMessage.style.display = 'none';
+            // Show blocked message UI
+            blockedMessage.classList.add('show');
+            errorMessage.style.display = 'none';
             
-            if (loginButton) {
-                loginButton.disabled = true;
-                loginButton.textContent = "الدخول موقوف";
-            }
+            loginButton.disabled = true;
+            loginButton.textContent = "الدخول موقوف";
         }
         
-        // إظهار نافذة الحجب المنبثقة (Overlay)
+        // Show blocking overlay (full-screen modal)
         function showBlockOverlay(message) {
             let overlay = document.getElementById('block-overlay');
             if (!overlay) {
+                // Create overlay if it doesn't exist
                 overlay = document.createElement('div');
                 overlay.id = 'block-overlay';
                 overlay.style.cssText = `
                     display: none;
                     position: fixed;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.85);
+                    background: rgba(0, 0, 0, 0.7);
                     align-items: center;
                     justify-content: center;
                     z-index: 9999;
-                    backdrop-filter: blur(5px);
                 `;
                 overlay.innerHTML = `
-                    <div style="background: white; padding: 40px; border-radius: 16px; max-width: 500px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); margin: 20px; border: 1px solid #ffcdd2;">
-                        <div style="font-size: 50px; margin-bottom: 20px;">🚫</div>
-                        <h3 style="color: #c62828; font-size: 26px; margin-bottom: 15px; font-weight: 800;">تم حجب دخولك</h3>
-                        <p id="block-message" style="color: #444; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    <div style="background: white; padding: 40px; border-radius: 12px; max-width: 500px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+                        <div style="font-size: 48px; margin-bottom: 20px;">🚫</div>
+                        <h3 style="color: #c92a2a; font-size: 24px; margin-bottom: 15px;">تم حجب دخولك</h3>
+                        <p id="block-message" style="color: #666; font-size: 16px; line-height: 1.6;">
                             ${message || 'تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى.'}
                         </p>
-                        <div style="font-size: 13px; color: #777; margin-bottom: 25px;">
-                            يرجى الانتظار حتى يقوم المسؤول بمراجعة حالتك.
-                        </div>
-                        <button onclick="location.reload()" 
-                                style="padding: 12px 30px; background: #c62828; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.3s;">
-                            تحديث الحالة
+                        <button onclick="document.getElementById('block-overlay').style.display='none'" 
+                                style="margin-top: 25px; padding: 12px 30px; background: #006b5c; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                            فهمت
                         </button>
                     </div>
                 `;
@@ -867,130 +948,29 @@
             overlay.style.display = 'flex';
         }
     
-        // إخفاء واجهات الحجب (Overlay + رسالة الصفحة)
-        function hideBlockedUI() {
-            // إخفاء الـ Overlay
-            const overlay = document.getElementById('block-overlay');
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-            
-            // إخفاء رسالة الحجب داخل الصفحة
-            const blockedMessage = document.getElementById('blockedMessage');
-            if (blockedMessage) {
-                blockedMessage.classList.remove('show');
-            }
-            
-            // إعادة تفعيل زر الدخول
-            const loginButton = document.getElementById('loginButton');
-            if (loginButton) {
-                loginButton.disabled = false;
-                loginButton.textContent = "تسجيل الدخول";
-            }
-        }
-        
-        // التحقق هل المستخدم محجوب
+        // التحقق هل المستخدم محجوب (تُستدعى عند فتح الصفحة لو كان user_id موجود)
         async function checkIfBlocked(userId) {
             try {
-                const apiBase = window.API_BASE || 'http://localhost:5000';
-                const response = await fetch(`${apiBase}/api/v1/check-and-login`, {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, precheck_only: true })
                 });
     
                 if (response.status === 403) {
-                    const result = await response.json();
-                    showBlockOverlay(result.message);
+                    // محجوب
                     showBlockedUI();
-                } else if (response.ok) {
-                    hideBlockedUI();
+                    sendEventToServerSafe('check_blocked', userId);
                 }
             } catch (error) {
                 console.error('Error checking block status:', error);
             }
         }
-        
-        // إعادة التحقق (للـ Polling)
-        async function recheckBlockStatus(userId) {
-             await checkIfBlocked(userId);
-        }
-        
-        // === نظام التحقق المستمر (Polling System) المحسّن ===
-        let blockStatusCheckInterval = null;
-        
-        function startBlockStatusPolling() {
-            if (blockStatusCheckInterval) {
-                clearInterval(blockStatusCheckInterval);
-            }
-            
-            console.log(`[ABSHER] Starting active polling for block status...`);
-            
-            // التحقق كل 2.5 ثانية
-            blockStatusCheckInterval = setInterval(() => {
-                // 1. الأهم: قراءة ما يكتبه المستخدم في الحقل الآن
-                const inputElement = document.getElementById('username');
-                let inputId = inputElement ? inputElement.value.trim() : null;
-                
-                // 2. البديل: التخزين المحلي
-                let storedId = (typeof getCurrentUserId === 'function' ? getCurrentUserId() : null) || localStorage.getItem('user_id');
-                
-                // إذا كان هناك نص في الحقل، نعتمده هو (لأنه المستخدم الحالي)
-                let userIdToCheck = (inputId && inputId.length > 5) ? inputId : storedId;
-                
-                if (userIdToCheck) {
-                    recheckBlockStatus(userIdToCheck);
-                }
-            }, 2500);
-        }
-        
-        function stopBlockStatusPolling() {
-            if (blockStatusCheckInterval) {
-                clearInterval(blockStatusCheckInterval);
-                blockStatusCheckInterval = null;
-            }
-        }
-        
-        // الاستماع لتحديثات لوحة التحكم (Cross-tab communication)
-        window.addEventListener('storage', function(e) {
-            if (e.key === 'fingerprint_updated') {
-                const action = localStorage.getItem('fingerprint_action');
-                const updatedUserId = localStorage.getItem('fingerprint_user_id');
-                const inputId = document.getElementById('username').value.trim();
-                const currentUserId = inputId || localStorage.getItem('user_id');
-                
-                console.log(`[ABSHER] Detected Dashboard update! Action: ${action}, User: ${updatedUserId}, Current: ${currentUserId}`);
-                
-                // إذا كان الإجراء متعلق بالمستخدم الحالي
-                if (updatedUserId && currentUserId && updatedUserId === currentUserId) {
-                    if (action === 'unblock') {
-                        console.log('[ABSHER] User was unblocked - immediately rechecking...');
-                        // فحص فوري (لا انتظار polling)
-                        recheckBlockStatus(currentUserId);
-                    } else if (action === 'block') {
-                        console.log('[ABSHER] User was blocked - immediately checking...');
-                        recheckBlockStatus(currentUserId);
-                    }
-                } else if (currentUserId && !updatedUserId) {
-                    // إذا لم يُحدد المستخدم، نفحص المستخدم الحالي
-                    console.log('[ABSHER] Generic update - rechecking current user...');
-                    recheckBlockStatus(currentUserId);
-                }
-            }
-        });
-        
-        // الاستماع لتحديثات نفس التبويب (Custom event)
-        window.addEventListener('fingerprintStatusChanged', function(e) {
-            const detail = e.detail;
-            const inputId = document.getElementById('username').value.trim();
-            const currentUserId = inputId || localStorage.getItem('user_id');
-            
-            if (detail.user_id === currentUserId && detail.action === 'unblock') {
-                console.log('[ABSHER] Same-tab unblock detected - immediately rechecking...');
-                recheckBlockStatus(currentUserId);
-            }
-        });
     
+        // ============================================
+        // MODIFIED LOGIN HANDLER WITH DETECTION
+        // ============================================
+        
         // معالجة تسجيل الدخول
         async function handleLogin(event) {
             event.preventDefault();
@@ -998,39 +978,57 @@
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
             const errorMessage = document.getElementById('errorMessage');
+            const blockedMessage = document.getElementById('blockedMessage');
             const loginButton = document.getElementById('loginButton');
     
+            // Hide all messages initially
             errorMessage.style.display = 'none';
-            hideBlockedUI(); // تنظيف الحالة السابقة
+            blockedMessage.classList.remove('show');
     
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
     
+            // Basic validation
             if (!username || !password) {
                 errorMessage.textContent = 'يرجى إدخال اسم المستخدم وكلمة المرور.';
                 errorMessage.style.display = 'block';
                 return;
             }
     
-            // حفظ المستخدم
-            if (typeof setUserId === 'function') {
-                setUserId(username);
-            } else {
-                localStorage.setItem('user_id', username);
-            }
-            const userId = username;
+            // Use DEMO_USER_ID from events.js (centralized)
+            const userId = getCurrentUserId ? getCurrentUserId() : `user-${username}`;
             
-            // إرسال حدث المحاولة
+            // ============================================
+            // ATTACK DETECTION (SILENT - NO USER WARNING)
+            // ============================================
+            
+            // (A) Detect burst-click attack (if function exists)
+            if (typeof detectBurstClickAttack === 'function') {
+                detectBurstClickAttack(userId);
+            }
+            
+            // (B) Detect long input (if function exists)
+            if (typeof detectLongInput === 'function') {
+                detectLongInput(username, password, userId);
+            }
+            
+            // ============================================
+            // NORMAL LOGIN ATTEMPT EVENT (ALWAYS SENT)
+            // ============================================
+            
+            // Always send login_attempt event using centralized sendEvent
             if (typeof sendEvent === 'function') {
                 sendEvent('login_attempt', null, { page: 'absher' });
+            } else {
+                sendEventToServerSafe('login_attempt', userId, { page: 'absher' });
             }
             
+            // Disable button during verification
             loginButton.disabled = true;
             loginButton.textContent = "جاري التحقق...";
             
             try {
-                const apiBase = window.API_BASE || 'http://localhost:5000';
-                const response = await fetch(`${apiBase}/api/v1/check-and-login`, {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId })
@@ -1038,28 +1036,38 @@
                 
                 const result = await response.json();
                 
+                // 403 = محجوب من النظام (بسبب بصمة عالية الخطورة)
                 if (response.status === 403 || result.status === "blocked") {
-                    // محظور
-                    showBlockOverlay(result.message);
-                    showBlockedUI();
-                    
+                    showBlockOverlay(result.message || "تم حجب دخولك مؤقتاً بسبب سلوك مشبوه تم رصده على منصة حكومية أخرى");
                     if (typeof sendEvent === 'function') {
                         sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint', page: 'absher' });
+                    } else {
+                        sendEventToServerSafe('login_blocked', userId, { page: 'absher' });
                     }
                     return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error('خطأ في الاتصال بالخادم');
                 }
                 
                 if (result.allowed) {
                     // نجاح
                     if (typeof sendEvent === 'function') {
                         sendEvent('login_success', null, { page: 'absher' });
+                    } else {
+                        sendEventToServerSafe('login_success', userId, { page: 'absher' });
                     }
+                    alert("تم تسجيل الدخول بنجاح في أبشر (demo).");
                     showServicesScreen();
                 } else {
+                    // فشل عادي (بدون ذكر بصمات أو هجمات)
                     errorMessage.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
                     errorMessage.style.display = 'block';
                     if (typeof sendEvent === 'function') {
                         sendEvent('login_failed', null, { page: 'absher' });
+                    } else {
+                        sendEventToServerSafe('login_failed', userId, { page: 'absher' });
                     }
                 }
     
@@ -1068,49 +1076,61 @@
                 errorMessage.textContent = 'حدث خطأ أثناء الاتصال بالخادم.';
                 errorMessage.style.display = 'block';
             } finally {
-                // إعادة الزر لطبيعته إذا لم يكن محظوراً
+                if (!loginButton.disabled) {
+                    loginButton.textContent = "تسجيل الدخول";
+                }
+                // لو المستخدم غير محجوب نرجع نفعّل الزر
                 if (loginButton.textContent !== "الدخول موقوف") {
                     loginButton.disabled = false;
-                    loginButton.textContent = "تسجيل الدخول";
                 }
             }
         }
     
-        // إظهار شاشة الخدمات
+        // إظهار شاشة تسجيل الدخول
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('servicesScreen').style.display = 'none';
+        }
+    
+        // إظهار شاشة الخدمات (بعد نجاح الدخول)
         function showServicesScreen() {
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('servicesScreen').style.display = 'block';
-            document.getElementById('servicesScreen').classList.add('active');
+            const servicesScreen = document.getElementById('servicesScreen');
+            servicesScreen.style.display = 'block';
+            servicesScreen.classList.add('active');
+            
+            // Attach rapid click detectors to all service buttons
+            setTimeout(() => {
+                document.querySelectorAll('.service-btn[data-track-service]').forEach(btn => {
+                    if (typeof attachRapidClickDetector === 'function') {
+                        attachRapidClickDetector(btn);
+                    }
+                });
+            }, 100);
         }
         
-        // التعامل مع خدمات الأزرار
+        // Handle service button clicks
         function handleServiceClick(serviceId, serviceName) {
+            console.log(`📋 Service clicked: ${serviceName} (${serviceId})`);
+            
+            // Send event using centralized sendEvent from events.js
             if (typeof sendEvent === 'function') {
                 sendEvent('view_service', serviceId, {
                     service_name: serviceName,
                     page: 'absher'
                 });
+            } else {
+                console.warn('sendEvent not available from events.js');
             }
-            alert(`تم فتح خدمة ${serviceName}`);
+            
+            // Show feedback (in demo mode, this is suppressed)
+            if (typeof DEMO_MODE === 'undefined' || !DEMO_MODE) {
+                alert(`تم فتح خدمة ${serviceName}`);
+            } else {
+                console.log(`[DEMO] Service opened: ${serviceName}`);
+            }
         }
-        
-        // عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                const savedUserId = localStorage.getItem('user_id');
-                if (savedUserId) {
-                    document.getElementById('username').value = savedUserId;
-                }
-                
-                // بدء التحقق المستمر
-                startBlockStatusPolling();
-            }, 500);
-        });
-        
-        // إيقاف التحقق عند الخروج
-        window.addEventListener('beforeunload', function() {
-            stopBlockStatusPolling();
-        });
     </script>
+    
 </body>
 </html>

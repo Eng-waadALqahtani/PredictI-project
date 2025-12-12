@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توكلنا - تسجيل</title>
+    <script src="../js/events.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Arial', 'Tahoma', sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #333333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* Header - شعار توكلنا */
+        .header-logo {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10;
+        }
+        
+        .tawakkalna-logo {
+            height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .logo-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        
+        .logo-text-arabic {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333333;
+            line-height: 1.2;
+        }
+        
+        .logo-text-english {
+            font-size: 14px;
+            font-weight: 400;
+            color: #999999;
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #00a69b 0%, #00897b 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            margin-right: 8px;
+            box-shadow: 0 4px 8px rgba(0, 166, 155, 0.3);
+        }
+        
+        /* Form Container */
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 50px 40px 40px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 100px;
+        }
+        
+        /* Top Section - تسجيل + Login Link */
+        .form-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+        
+        .form-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        
+        .login-link {
+            color: #8b4513;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .login-link:hover {
+            color: #a0522d;
+        }
+        
+        /* Tabs - مواطن / زائر */
+        .tabs-container {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #999999;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            font-family: inherit;
+        }
+        
+        .tab.active {
+            color: #333333;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: 0;
+            left: 0;
+            height: 2px;
+            background: #00a69b;
+        }
+        
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #333333;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #333333;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #00a69b;
+        }
+        
+        .form-group input::placeholder {
+            color: #999999;
+        }
+        
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+            accent-color: #00a69b;
+        }
+        
+        .checkbox-group label {
+            font-size: 14px;
+            color: #333333;
+            font-weight: 400;
+            cursor: pointer;
+            line-height: 1.5;
+        }
+        
+        /* reCAPTCHA */
+        .recaptcha-container {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background: #f9f9f9;
+        }
+        
+        .recaptcha-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #999999;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .recaptcha-checkbox.checked {
+            background: #00a69b;
+            border-color: #00a69b;
+        }
+        
+        .recaptcha-checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .recaptcha-text {
+            font-size: 14px;
+            color: #333333;
+            font-weight: 500;
+        }
+        
+        .recaptcha-logo {
+            margin-right: auto;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .recaptcha-logo-text {
+            font-size: 10px;
+            color: #666666;
+        }
+        
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            padding: 16px;
+            background: #00a69b;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-family: inherit;
+        }
+        
+        .submit-button:hover {
+            background: #00897b;
+        }
+        
+        .submit-button:active {
+            transform: scale(0.98);
+        }
+        
+        /* Services Screen - مخفية افتراضياً */
+        .services-screen {
+            display: none;
+            width: 100%;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        
+        .top-header {
+            background: #ffffff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid #00a69b;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .top-header h1 {
+            color: #333333;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .top-header a {
+            color: #00a69b;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .top-header a:hover {
+            color: #00897b;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        .info-dashboard {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .info-dashboard h2 {
+            color: #333333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-right: 4px solid #00a69b;
+            text-align: right;
+        }
+        
+        .info-card h3 {
+            color: #00a69b;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .info-card p {
+            color: #666666;
+            font-size: 14px;
+        }
+        
+        .attack-section {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .attack-section h2 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .attack-section p {
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .attack-button {
+            background: white;
+            color: #e74c3c;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .attack-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background: #fff5f5;
+        }
+        
+        .analysis-message {
+            background: #e8f5f4;
+            border: 2px solid #00a69b;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        .analysis-message.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .analysis-message .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .analysis-message h3 {
+            color: #00a69b;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .analysis-message p {
+            color: #333333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .dashboard-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #00a69b;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(0, 166, 155, 0.3);
+        }
+        
+        .dashboard-link:hover {
+            background: #00897b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 166, 155, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 40px 25px 30px;
+                margin-top: 80px;
+            }
+            
+            .header-logo {
+                top: 20px;
+            }
+            
+            .tawakkalna-logo {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- صفحة تسجيل الدخول -->
+    <div class="login-screen" id="loginScreen">
+        <!-- Header Logo -->
+        <div class="header-logo">
+            <div class="logo-icon">✓</div>
+            <div class="logo-text-container">
+                <div class="logo-text-arabic">توكلنا</div>
+                <div class="logo-text-english">Tawakkalna</div>
+            </div>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="form-container">
+            <div class="form-top">
+                <div>
+                    <h1 class="form-title">تسجيل</h1>
+                    <div class="tabs-container">
+                        <button class="tab active" onclick="switchTab('citizen')">مواطن / مقيم</button>
+                        <button class="tab" onclick="switchTab('visitor')">زائر / خليجي</button>
+                    </div>
+                </div>
+                <a href="#" class="login-link">تسجيل الدخول</a>
+            </div>
+            
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="idNumber">رقم الهوية الوطنية / الإقامة</label>
+                    <input 
+                        type="text" 
+                        id="idNumber" 
+                        name="idNumber" 
+                        placeholder="رقم الهوية الوطنية / الإقامة"
+                        required
+                        maxlength="10"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="birthDate">تاريخ الميلاد</label>
+                    <input 
+                        type="text" 
+                        id="birthDate" 
+                        name="birthDate" 
+                        placeholder="يوم - شهر - سنة"
+                        required
+                    >
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">يرجى الموافقة على شروط الاستخدام وسياسة الخصوصية</label>
+                </div>
+                
+                <div class="recaptcha-container">
+                    <div class="recaptcha-checkbox" id="recaptchaCheckbox" onclick="toggleRecaptcha()"></div>
+                    <div class="recaptcha-text">I'm not a robot</div>
+                    <div class="recaptcha-logo">
+                        <div style="color: #00a69b; font-size: 12px; font-weight: bold;">reCAPTCHA</div>
+                        <div class="recaptcha-logo-text">Privacy - Terms</div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-button">تسجيل</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- صفحة الخدمات الداخلية -->
+    <div class="services-screen" id="servicesScreen">
+        <div class="top-header">
+            <h1>لوحة المعلومات - توكلنا</h1>
+            <a href="hub.html" style="color: #00a69b; text-decoration: none; font-size: 14px; font-weight: 500;">← العودة للصفحة الرئيسية</a>
+        </div>
+        
+        <div class="container">
+            <div class="info-dashboard">
+                <h2>مرحباً بك في توكلنا</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🆔 الهوية الرقمية</h3>
+                        <p>عرض هويتك الرقمية</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>📱 الخدمات الذكية</h3>
+                        <p>الوصول إلى جميع الخدمات</p>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h3>🔒 الأمان</h3>
+                        <p>حماية بياناتك الشخصية</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Attack section hidden for demo (use Ctrl+Shift+A or 3 clicks on logo) -->
+            <div class="attack-section" style="display: none;">
+                <h2>⚠️ محاكاة الهجوم</h2>
+                <p>انقر على الزر أدناه لمحاكاة نمط هجوم عالي السرعة.</p>
+                <button class="attack-button" id="attackButton" onclick="triggerAttackSimulation()">
+                    🚨 تفعيل محاكاة الهجوم
+                </button>
+                
+                <div style="margin-top: 20px;">
+                    <p style="font-size: 14px; color: #666; margin-bottom: 10px;">محاكاة التنقل غير العادي:</p>
+                    <button class="attack-button" id="navButton" onclick="triggerUnusualNavigation()" style="background: #667eea;">
+                        🔄 محاكاة التنقل غير العادي
+                    </button>
+                </div>
+                
+                <div class="analysis-message" id="analysisMessage" style="display: none;">
+                    <div class="icon">✅</div>
+                    <h3>تم تشغيل المحاكاة</h3>
+                    <p>يتم التحليل في الخلفية.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API_BASE is defined in events.js - don't redeclare it here
+        // Use window.API_BASE if needed, or rely on events.js
+    
+        // ============================================
+        // UI-BASED ATTACK DETECTION SYSTEM
+        // ============================================
+        
+        // (A) Burst-Click Attack Detection
+        // Array to store login click timestamps
+        const loginClickTimestamps = [];
+        const BURST_ATTACK_THRESHOLD = 3; // 3 or more clicks
+        const BURST_ATTACK_WINDOW = 5000;  // within 5 seconds (5000ms)
+        
+        /**
+         * Records a login button click timestamp and detects burst attacks
+         * @param {string} userId - The user ID attempting login
+         * @returns {boolean} - True if burst attack detected, false otherwise
+         */
+        function detectBurstClickAttack(userId) {
+            const now = Date.now();
+            
+            // Add current click timestamp
+            loginClickTimestamps.push(now);
+            
+            // Remove timestamps older than 5 seconds
+            const recentClicks = loginClickTimestamps.filter(ts => now - ts <= BURST_ATTACK_WINDOW);
+            
+            // Update array to only keep recent clicks
+            loginClickTimestamps.length = 0;
+            loginClickTimestamps.push(...recentClicks);
+            
+            // Check if burst attack detected (3+ clicks in 5 seconds)
+            if (recentClicks.length >= BURST_ATTACK_THRESHOLD) {
+                // Generate suspicious pattern event
+                sendEventToServerSafe('ui_suspicious_pattern', userId, {
+                    burst_attack: true,
+                    click_count: recentClicks.length,
+                    page: 'tawakkalna'
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // (B) Long Input Detection
+        /**
+         * Detects suspiciously long ID number or birth date inputs
+         * @param {string} idNumber - The ID number input value
+         * @param {string} birthDate - The birth date input value
+         * @param {string} userId - The user ID
+         * @returns {boolean} - True if long input detected, false otherwise
+         */
+        function detectLongInput(idNumber, birthDate, userId) {
+            const idNumberLength = idNumber ? idNumber.length : 0;
+            const birthDateLength = birthDate ? birthDate.length : 0;
+            
+            // Suspicious if ID number >= 20 OR birth date >= 32
+            if (idNumberLength >= 20 || birthDateLength >= 32) {
+                // Generate suspicious pattern event
+                sendEventToServerSafe('ui_suspicious_pattern', userId, {
+                    long_input: true,
+                    id_number_length: idNumberLength,
+                    birth_date_length: birthDateLength,
+                    page: 'tawakkalna'
+                });
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // ============================================
+        // EXISTING FUNCTIONS (UNCHANGED)
+        // ============================================
+    
+        // Use sendEvent from events.js (centralized event tracking)
+        function sendEventToServerSafe(eventType, userId, extra = {}) {
+            try {
+                if (typeof sendEvent === "function") {
+                    // sendEvent from events.js handles user_id automatically via getCurrentUserId()
+                    sendEvent(eventType, extra.service_name || null, extra);
+                } else {
+                    // Fallback to old method if sendEvent not available
+                    const deviceId = localStorage.getItem("device_id") || "device-" + Math.random().toString(36).substring(2, 15);
+                    if (!localStorage.getItem("device_id")) {
+                        localStorage.setItem("device_id", deviceId);
+                    }
+                    
+                    const payload = {
+                        event_type: eventType,
+                        user_id: userId,
+                        device_id: deviceId,
+                        timestamp1: new Date().toISOString()
+                    };
+                    
+                    // إضافة service_name إذا كان موجوداً في extra
+                    if (extra.service_name) {
+                        payload.service_name = extra.service_name;
+                    }
+                    
+                    console.log(`📤 [SENDING EVENT] Type: ${eventType}, User: ${userId}, Payload:`, payload);
+                    
+                    fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/event`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    })
+                    .then(response => {
+                        console.log(`📥 [EVENT RESPONSE] Status: ${response.status}, Type: ${eventType}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(`✅ [EVENT SENT] Type: ${eventType}, Response:`, data);
+                        if (data.fingerprint_generated) {
+                            console.warn("⚠️ Threat Fingerprint Generated:", data.fingerprint_id);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`❌ [EVENT ERROR] Type: ${eventType}, Error:`, error);
+                    });
+                }
+            } catch (e) {
+                console.error(`❌ [EVENT EXCEPTION] Type: ${eventType}, Exception:`, e);
+            }
+        }
+    
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUserId = localStorage.getItem('user_id');
+            if (savedUserId) {
+                checkIfBlocked(savedUserId);
+            } else {
+                showLoginScreen();
+            }
+        });
+    
+        // نفس الـ endpoint يستخدم كبوابة حجب موحّدة بين أبشر و توكلنا
+        async function checkIfBlocked(userId) {
+            try {
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, precheck_only: true })
+                });
+    
+                if (response.status === 403) {
+                    // المستخدم محجوب: ما نعطيه حتى نموذج التسجيل
+                    showBlockedOverlay();
+                    sendEventToServerSafe('check_blocked', userId, { page: 'tawakkalna' });
+                } else {
+                    showLoginScreen();
+                }
+            } catch (error) {
+                console.error('Error checking block status:', error);
+                showLoginScreen();
+            }
+        }
+    
+        function showBlockedOverlay() {
+            // أبسط شيء: نخلي loginScreen مخفي ونظهر رسالة عامة
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('servicesScreen').style.display = 'block';
+            document.querySelector('.info-dashboard h2').textContent = 'تم إيقاف الدخول مؤقتاً';
+            document.querySelector('.info-grid').innerHTML = `
+                <div class="info-card">
+                    <h3>🚫 الحساب موقوف</h3>
+                    <p>تم إيقاف الدخول على المنصة مؤقتاً. يرجى المحاولة لاحقاً أو التواصل مع الدعم.</p>
+                </div>
+            `;
+            document.querySelector('.attack-section').style.display = 'none';
+        }
+    
+        // تبديل التبويبات (مواطن / زائر)
+        function switchTab(type) {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    
+        function toggleRecaptcha() {
+            const checkbox = document.getElementById('recaptchaCheckbox');
+            checkbox.classList.toggle('checked');
+        }
+    
+        // ============================================
+        // MODIFIED LOGIN HANDLER WITH DETECTION
+        // ============================================
+    
+        // معالجة "تسجيل" في توكلنا
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const idNumber = document.getElementById('idNumber').value.trim();
+            const birthDate = document.getElementById('birthDate').value.trim();
+            const terms = document.getElementById('terms').checked;
+            const recaptcha = document.getElementById('recaptchaCheckbox').classList.contains('checked');
+    
+            // Basic validation
+            if (!(idNumber && idNumber.length === 10 && birthDate && terms && recaptcha)) {
+                alert('يرجى ملء جميع الحقول والموافقة على الشروط');
+                return;
+            }
+    
+            const userId = `user-${idNumber}`;
+    
+            // ============================================
+            // ATTACK DETECTION (SILENT - NO USER WARNING)
+            // ============================================
+            
+            // (A) Detect burst-click attack
+            detectBurstClickAttack(userId);
+            
+            // (B) Detect long input
+            detectLongInput(idNumber, birthDate, userId);
+            
+            // ============================================
+            // NORMAL LOGIN ATTEMPT EVENT (ALWAYS SENT)
+            // ============================================
+    
+            // Use DEMO_USER_ID from events.js (centralized)
+            const demoUserId = getCurrentUserId ? getCurrentUserId() : userId;
+            
+            // Always send login_attempt event using centralized sendEvent
+            if (typeof sendEvent === 'function') {
+                sendEvent('login_attempt', null, { page: 'tawakkalna' });
+            } else {
+                sendEventToServerSafe('login_attempt', userId, { page: 'tawakkalna' });
+            }
+            
+            try {
+                // نستخدم نفس بوابة check-and-login لنعرف إذا المستخدم أصلاً محجوب أو لا
+                const response = await fetch(`${window.API_BASE || 'http://localhost:5000'}/api/v1/check-and-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: demoUserId })
+                });
+                
+                const result = await response.json();
+                
+                if (response.status === 403 || result.status === "blocked") {
+                    showBlockedOverlay();
+                    if (typeof sendEvent === 'function') {
+                        sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint', page: 'tawakkalna' });
+                    } else {
+                        sendEventToServerSafe('login_blocked', userId, { page: 'tawakkalna' });
+                    }
+                    return;
+                }
+                
+                // إذا مو محجوب نكمّل كبيانات تسجيل عادية
+                if (typeof sendEvent === 'function') {
+                    sendEvent('login_success', null, { page: 'tawakkalna' });
+                } else {
+                    sendEventToServerSafe('login_success', userId, { page: 'tawakkalna' });
+                }
+                showServicesScreen();
+    
+            } catch (error) {
+                console.error('Error during Tawakkalna login:', error);
+                alert('حدث خطأ أثناء الاتصال بالخادم');
+            }
+        }
+    
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('servicesScreen').style.display = 'none';
+            document.body.style.background = '#ffffff';
+            document.body.style.display = 'flex';
+        }
+    
+        function showServicesScreen() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('servicesScreen').style.display = 'block';
+            document.body.style.background = '#f5f7fa';
+            document.body.style.display = 'block';
+        }
+    
+        // محاكاة الهجوم: ترسل سيل أحداث فقط – لا شيء يظهر للمستخدم غير رسالة بسيطة
+        function triggerAttackSimulation() {
+            console.log("🚨 [ATTACK SIMULATION] Starting attack simulation...");
+            const attackButton = document.getElementById('attackButton');
+            const analysisMessage = document.getElementById('analysisMessage');
+    
+            if (!attackButton) {
+                console.error("❌ [ATTACK SIMULATION] Attack button not found!");
+                return;
+            }
+    
+            attackButton.disabled = true;
+            attackButton.textContent = "⏳ جاري المحاكاة...";
+    
+            const userId = localStorage.getItem('user_id') || 'user-guest';
+            console.log(`📋 [ATTACK SIMULATION] User ID: ${userId}`);
+    
+            const totalEvents = 20;
+            const durationMs = 2000;
+            const intervalMs = durationMs / totalEvents;
+            console.log(`📊 [ATTACK SIMULATION] Will send ${totalEvents} events in ${durationMs}ms (${intervalMs}ms interval)`);
+    
+            let eventCount = 0;
+    
+            const attackInterval = setInterval(() => {
+                // أحداث عالية الخطورة – كلها تروح للـ backend وتظهر في dashboard/SOC
+                console.log(`📤 [ATTACK SIMULATION] Sending event #${eventCount + 1}/${totalEvents}`);
+                sendEventToServerSafe("update_mobile_attempt", userId, { page: 'tawakkalna' });
+                eventCount++;
+    
+                if (eventCount % 3 === 0) {
+                    sendEventToServerSafe("view_digital_id", userId, { page: 'tawakkalna' });
+                }
+    
+                if (eventCount >= totalEvents) {
+                    clearInterval(attackInterval);
+                    console.log(`✅ [ATTACK SIMULATION] Completed! Sent ${eventCount} events`);
+    
+                    attackButton.disabled = false;
+                    attackButton.textContent = "🚨 تفعيل محاكاة الهجوم";
+    
+                    analysisMessage.style.display = 'block';
+                    analysisMessage.classList.add('show');
+    
+                    setTimeout(() => {
+                        analysisMessage.classList.remove('show');
+                        setTimeout(() => {
+                            analysisMessage.style.display = 'none';
+                        }, 300);
+                    }, 2000);
+                }
+            }, intervalMs);
+    
+            // دفعة إضافية سريعة في النهاية
+            setTimeout(() => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        sendEventToServerSafe("update_mobile_attempt", userId, { page: 'tawakkalna', burst: true });
+                    }, i * 50);
+                }
+            }, durationMs - 250);
+        }
+        
+        // محاكاة التنقل غير العادي: زيارة عدد كبير من الخدمات/الصفحات المختلفة
+        function triggerUnusualNavigation() {
+            const userId = localStorage.getItem('user_id') || 'user-guest';
+            
+            // قائمة بأسماء الخدمات المختلفة لمحاكاة التنقل غير العادي
+            const services = [
+                'appointment_1', 'appointment_2', 'appointment_3',
+                'report_1', 'report_2', 'report_3',
+                'service_1', 'service_2', 'service_3',
+                'page_1', 'page_2', 'page_3',
+                'view_1', 'view_2'
+            ];
+            
+            // إرسال 12-15 حدث من نوع view_service مع service_name مختلف في كل مرة
+            const totalEvents = 12;
+            const durationMs = 3000; // 3 ثوان
+            const intervalMs = durationMs / totalEvents;
+            
+            let eventCount = 0;
+            
+            const navInterval = setInterval(() => {
+                const serviceIndex = eventCount % services.length;
+                const serviceName = services[serviceIndex];
+                
+                // إرسال حدث view_service مع service_name مدمج في event_type
+                // Format: "view_service_serviceName" للتمييز بين الخدمات المختلفة
+                const eventType = `view_service_${serviceName}`;
+                sendEventToServerSafe(eventType, userId, { 
+                    page: 'tawakkalna',
+                    service_name: serviceName 
+                });
+                
+                eventCount++;
+                
+                // إضافة بعض أحداث view_digital_id بين الحين والآخر
+                if (eventCount % 4 === 0) {
+                    sendEventToServerSafe("view_digital_id", userId, { 
+                        page: 'tawakkalna' 
+                    });
+                }
+                
+                if (eventCount >= totalEvents) {
+                    clearInterval(navInterval);
+                    console.log(`✅ Unusual navigation simulation complete: ${eventCount} events sent`);
+                }
+            }, intervalMs);
+        }
+    </script>    
+</body>
+</html>

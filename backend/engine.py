@@ -29,6 +29,27 @@ _isolation_forest_model: Optional[IsolationForest] = None
 MAX_NORMAL_SCORE = 0.1
 MIN_ANOMALY_SCORE = -0.25 # Adjusted for better detection
 
+# ================== Risk Score Threshold Configuration ==================
+# RISK_SCORE_BLOCKING_THRESHOLD: الحد الأدنى لدرجة الخطورة التي تسبب حجب المستخدم
+# 
+# الأساس المنطقي لاختيار 80:
+# 1. مقياس الخطورة من 0-100، حيث:
+#    - 0-49: منخفضة (Low) - سلوك طبيعي أو شك بسيط
+#    - 50-79: متوسطة (Medium) - سلوك مشبوه يحتاج مراقبة لكن لا يحجب
+#    - 80-100: عالية (High) - سلوك خطير يستدعي الحجب الفوري
+#
+# 2. الرقم 80 يمثل نسبة 80% من الخطورة القصوى - أي أننا نحجب عندما يكون هناك
+#    احتمال 80% أو أكثر أن السلوك يمثل تهديداً حقيقياً.
+#
+# 3. هذا الحد يوازن بين:
+#    - تقليل False Positives (عدم حجب مستخدمين شرعيين)
+#    - ضمان الكشف الفوري للتهديدات الحقيقية
+#
+# يمكن تعديل هذا الرقم حسب متطلبات الأمان:
+# - رفع إلى 85-90: أكثر تحفظاً (أقل false positives، لكن قد تفوت بعض التهديدات)
+# - خفض إلى 70-75: أكثر حساسية (يكتشف تهديدات أكثر، لكن قد يحجب مستخدمين شرعيين)
+RISK_SCORE_BLOCKING_THRESHOLD = 80
+
 # ================== FEATURE 1: Device Change Detection ==================
 # Track last device_type used for each fingerprint (keyed by user_id)
 fingerprint_last_device: Dict[str, str] = {}
@@ -412,7 +433,7 @@ def is_user_fingerprinted(user_id: str) -> bool:
         db_fingerprints = session.query(FingerprintDB).filter(
             FingerprintDB.user_id == user_id,
             FingerprintDB.status == "ACTIVE",
-            FingerprintDB.risk_score >= 80
+            FingerprintDB.risk_score >= RISK_SCORE_BLOCKING_THRESHOLD
         ).all()
         
         if db_fingerprints:
@@ -711,6 +732,52 @@ def find_similar_fingerprints(behavioral_features: Dict[str, Any], top_k: int = 
     return similarities[:top_k]
 
 
+def reset_user_behavior_history(user_id: str) -> None:
+    """
+    Reset all in-memory behavioral tracking dictionaries for a specific user.
+    
+    This is called when an Admin unblocks a user to prevent immediate re-flagging
+    based on old history (e.g., preventing the engine from remembering an old Geo-Jump).
+    
+    Clears:
+    - fingerprint_last_device: Last device type used
+    - fingerprint_last_location: Last location and timestamp
+    - fingerprint_location_history: History of IP/location changes
+    - LAST_DEVICE_INFO_BY_USER: Last device context info
+    - LAST_ATTACK_MODE_BY_USER: Last attack mode detected
+    """
+    global fingerprint_last_device
+    global fingerprint_last_location
+    global fingerprint_location_history
+    global LAST_DEVICE_INFO_BY_USER
+    global LAST_ATTACK_MODE_BY_USER
+    
+    # 1. Clear Device History
+    if user_id in fingerprint_last_device:
+        del fingerprint_last_device[user_id]
+        print(f"🧹 [RESET] Cleared device history for {user_id}")
+
+    # 2. Clear Location History (Fixes Geo-Jump re-blocking)
+    if user_id in fingerprint_last_location:
+        del fingerprint_last_location[user_id]
+        print(f"🧹 [RESET] Cleared last location for {user_id}")
+    
+    if user_id in fingerprint_location_history:
+        del fingerprint_location_history[user_id]
+        print(f"🧹 [RESET] Cleared location history for {user_id}")
+
+    # 3. Clear Context Info
+    if user_id in LAST_DEVICE_INFO_BY_USER:
+        del LAST_DEVICE_INFO_BY_USER[user_id]
+        print(f"🧹 [RESET] Cleared device context info for {user_id}")
+
+    if user_id in LAST_ATTACK_MODE_BY_USER:
+        del LAST_ATTACK_MODE_BY_USER[user_id]
+        print(f"🧹 [RESET] Cleared attack mode history for {user_id}")
+        
+    print(f"✅ [RESET] User {user_id} behavioral memory wiped clean.")
+
+
 def process_event(event: Event) -> Optional[ThreatFingerprint]:
     """
     Process an event through the Threat Engine to detect anomalies.
@@ -854,7 +921,7 @@ def process_event(event: Event) -> Optional[ThreatFingerprint]:
 
     # 5) قرار إنشاء بصمة
     # أولاً: اعتماداً على الـ ML لو عطى Risk عالي
-    if ml_used and risk_score >= 80:
+    if ml_used and risk_score >= RISK_SCORE_BLOCKING_THRESHOLD:
         should_create_fingerprint = True
         trigger_source = "ML_HIGH_RISK"
 
@@ -866,13 +933,13 @@ def process_event(event: Event) -> Optional[ThreatFingerprint]:
             should_create_fingerprint = True
             trigger_source = "RULES_FALLBACK"
             # إذا الـ ML عطى درجة أقل، نضمن أنها عالية بما يكفي للحجب
-            if risk_score < 80:
-                risk_score = max(risk_score, 85)
+            if risk_score < RISK_SCORE_BLOCKING_THRESHOLD:
+                risk_score = max(risk_score, RISK_SCORE_BLOCKING_THRESHOLD + 5)
 
     # ================== Risk Boost for Device Switch / Geo Hop ==================
     # If there is a suspicious device switch or IP hop AND we already have some risk,
     # slightly boost the risk score (but keep it <= 100).
-    if (device_switch_detected or geo_hop_suspected) and risk_score < 80:
+    if (device_switch_detected or geo_hop_suspected) and risk_score < RISK_SCORE_BLOCKING_THRESHOLD:
         boosted_score = max(risk_score, 75)
         print(
             f"⚠️ [RISK BOOST] device_switch={device_switch_detected}, "
@@ -885,7 +952,7 @@ def process_event(event: Event) -> Optional[ThreatFingerprint]:
     # If attack profile changed (e.g., from mass_download to rapid_clicks),
     # this suggests a more advanced attacker adapting their strategy.
     # Boost risk score slightly.
-    if attack_profile_changed and risk_score < 80:
+    if attack_profile_changed and risk_score < RISK_SCORE_BLOCKING_THRESHOLD:
         boosted_score = max(risk_score, 70)
         print(
             f"⚠️ [RISK BOOST] attack_profile_changed=True | "
@@ -976,9 +1043,9 @@ def process_event(event: Event) -> Optional[ThreatFingerprint]:
     # Ensure risk_score doesn't exceed 100
     risk_score = min(100, risk_score)
     
-    # If any detection triggered, ensure risk_score is high enough for blocking (>= 80)
-    if detection_reasons and risk_score < 80:
-        risk_score = max(risk_score, 80)
+    # If any detection triggered, ensure risk_score is high enough for blocking
+    if detection_reasons and risk_score < RISK_SCORE_BLOCKING_THRESHOLD:
+        risk_score = max(risk_score, RISK_SCORE_BLOCKING_THRESHOLD)
         print(f"   ⚠️ [ADJUST] Risk score adjusted to minimum blocking threshold: {risk_score}")
 
     # Store detection reasons in behavioral_features

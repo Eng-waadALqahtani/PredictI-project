@@ -92,25 +92,11 @@ async function loadFingerprints() {
                 // Format behavioral features
                 const featuresHtml = formatBehavioralFeatures(fp.behavioral_features);
                 
-                // Format similar fingerprints badge if present
-                let similarityBadge = '';
-                if (fp.related_fingerprints && fp.related_fingerprints.length > 0) {
-                    const blockedCount = fp.related_fingerprints.filter(rf => 
-                        rf.status === 'BLOCKED' || rf.status === 'ACTIVE'
-                    ).length;
-                    const highestSim = Math.max(...fp.related_fingerprints.map(rf => rf.similarity || 0));
-                    const simPercent = (highestSim * 100).toFixed(0);
-                    
-                    similarityBadge = `<span class="similarity-badge" title="Similar to ${fp.related_fingerprints.length} previous fingerprint(s), highest similarity: ${simPercent}%">
-                        🔗 Similar to ${fp.related_fingerprints.length} previous${blockedCount > 0 ? ` (${blockedCount} BLOCKED/ACTIVE)` : ''}
-                    </span>`;
-                }
-                
                 // Determine if user is blocked (has ACTIVE fingerprint with risk >= 80)
                 const isBlocked = fp.status === "ACTIVE" && fp.risk_score >= 80;
                 
                 tr.innerHTML = `
-                    <td><code>${fp.fingerprint_id}</code>${similarityBadge}</td>
+                    <td><code>${fp.fingerprint_id}</code></td>
                     <td>${fp.user_id || 'غير محدد'}</td>
                     <td>
                         <span class="risk-score ${riskClass}">
@@ -237,25 +223,6 @@ async function unblockUser(userId, fingerprintId) {
         const data = await response.json();
         
         showSuccessMessage(`✅ ${data.message} (تم مسح ${data.cleared_fingerprints} بصمة)`);
-        
-        // Trigger cross-tab synchronization for immediate unblock
-        // localStorage.setItem automatically triggers 'storage' event in OTHER tabs
-        // For same-tab detection, we also dispatch a custom event
-        const now = Date.now().toString();
-        localStorage.setItem('fingerprint_updated', now);
-        localStorage.setItem('fingerprint_action', 'unblock');
-        localStorage.setItem('fingerprint_user_id', userId);
-        
-        // Dispatch custom event for same-tab pages (if any)
-        window.dispatchEvent(new CustomEvent('fingerprintStatusChanged', {
-            detail: {
-                action: 'unblock',
-                user_id: userId,
-                timestamp: now
-            }
-        }));
-        
-        console.log(`🔄 [SYNC] Triggered unblock sync for user ${userId} (timestamp: ${now})`);
         
         // Reload fingerprints
         setTimeout(() => {

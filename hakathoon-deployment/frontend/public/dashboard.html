@@ -486,7 +486,7 @@
         <header>
             <h1>🛡️ predictIQ - لوحة التحكم</h1>
             <div class="controls">
-                <a href="/hub.html" class="home-link">← العودة للصفحة الرئيسية</a>
+                <a href="/" class="home-link">← العودة للصفحة الرئيسية</a>
                 <button class="refresh-button" onclick="refreshCurrentTab()">
                     🔄 تحديث
                 </button>
@@ -882,23 +882,6 @@
                     message.classList.remove("show");
                 }, 3000);
                 
-                // إرسال إشارة للصفحات المفتوحة لإعادة التحقق
-                const now = Date.now().toString();
-                localStorage.setItem('fingerprint_updated', now);
-                localStorage.setItem('fingerprint_action', 'unblock');
-                localStorage.setItem('fingerprint_user_id', userId);
-                
-                // Dispatch custom event for same-tab pages (if any)
-                window.dispatchEvent(new CustomEvent('fingerprintStatusChanged', {
-                    detail: {
-                        action: 'unblock',
-                        user_id: userId,
-                        timestamp: now
-                    }
-                }));
-                
-                console.log(`🔄 [SYNC] Triggered unblock sync for user ${userId} (timestamp: ${now})`);
-                
                 loadAdminFingerprints();
             } catch (error) {
                 console.error("Error unblocking user:", error);
@@ -943,14 +926,6 @@
             }
             
             try {
-                // الحصول على user_id قبل الحذف
-                let userId = null;
-                const fingerprints = await fetch(`${API_BASE}/api/v1/fingerprints`).then(r => r.json());
-                const fp = fingerprints.find(f => f.fingerprint_id === fingerprintId);
-                if (fp) {
-                    userId = fp.user_id;
-                }
-                
                 const response = await fetch(`${API_BASE}/api/v1/delete-fingerprint`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -966,13 +941,6 @@
                 setTimeout(() => {
                     message.classList.remove("show");
                 }, 3000);
-                
-                // إرسال إشارة للصفحات المفتوحة لإعادة التحقق
-                if (userId) {
-                    localStorage.setItem('fingerprint_updated', Date.now().toString());
-                    localStorage.setItem('fingerprint_action', 'delete');
-                    localStorage.setItem('fingerprint_user_id', userId);
-                }
                 
                 // Reload fingerprints for the active tab
                 const activeTab = document.querySelector('.tab-content.active');

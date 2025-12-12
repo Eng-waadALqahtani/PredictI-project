@@ -1,0 +1,36 @@
+===========================================
+خطوات رفع المشروع إلى GitHub بدون Git
+===========================================
+
+1. افتح المتصفح واذهب إلى:
+   https://github.com/Eng-waadALqahtani/PredictI-project
+
+2. إذا كان المستودع غير موجود، أنشئه:
+   https://github.com/new
+   - Name: PredictI-project
+   - اضغط Create repository
+
+3. اضغط على "uploading an existing file"
+
+4. اسحب ملف hakathoon-deployment.zip إلى الصفحة
+
+5. اكتب رسالة: "Initial deployment files"
+
+6. اضغط "Commit changes"
+
+7. بعد الرفع، اذهب إلى Render:
+   https://dashboard.render.com
+
+8. اضغط "New +" → "Web Service"
+
+9. اضغط "Connect GitHub" واختر المستودع
+
+10. Render سيكتشف render.yaml تلقائياً
+
+11. اضغط "Create Web Service"
+
+===========================================
+جاهز! 🚀
+===========================================
+
+

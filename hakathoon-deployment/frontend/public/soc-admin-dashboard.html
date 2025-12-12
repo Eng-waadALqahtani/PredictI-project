@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>predictIQ - SOC Admin Dashboard</title>
+    <script src="../js/soc-admin-dashboard.js" defer></script>
+    <style>
+        /* (تم الاحتفاظ بجميع التنسيقات الأخرى لنظافة العرض) */
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            /* خلفية زرقاء داكنة (مناسبة لـ SOC) */
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #2c3e50;
+        }
+
+        h1 {
+            color: #1e40af;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .refresh-button {
+            background: #1e40af;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        thead {
+            background: #1e40af;
+            color: white;
+        }
+        /* (بقية التنسيقات CSS محفوظة) */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ predictIQ SOC - مراقبة الهجمات في الخلفية</h1>
+            <div class="controls">
+                <a href="/index.html" class="home-link">← العودة للصفحة الرئيسية</a>
+                <button class="refresh-button" onclick="loadFingerprints()">
+                    🔄 تحديث
+                </button>
+                <span style="color: #666; font-size: 14px;" id="last-updated"></span>
+            </div>
+        </header>
+        
+        <div class="stats" id="stats-section">
+            <div class="stat-card">
+                <h3>إجمالي البصمات</h3>
+                <div class="value" id="total-count">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>نشطة (ACTIVE)</h3>
+                <div class="value" id="active-count" style="color: #c92a2a;">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>محظورة (BLOCKED)</h3>
+                <div class="value" id="blocked-count" style="color: #e67700;">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>مُزال المنع (CLEARED)</h3>
+                <div class="value" id="cleared-count" style="color: #2f9e44;">0</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-table">
+            <div id="loading-message" class="loading" style="display: none;">
+                جاري تحميل البصمات...
+            </div>
+            
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <h3>لا توجد بصمات تهديد</h3>
+                <p>لم يتم اكتشاف أي شذوذ سلوكي بعد.</p>
+            </div>
+            
+            <table id="fingerprints-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>معرف البصمة</th>
+                        <th>معرف المستخدم</th>
+                        <th>درجة الخطورة</th>
+                        <th>الحالة</th>
+                        <th>الخصائص السلوكية</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="fingerprints-tbody">
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/dashboard.html" style="color: white; text-decoration: none; padding: 12px 24px; background: rgba(255,255,255,0.2); border-radius: 8px; display: inline-block;">
+                ← العودة إلى لوحة التحكم العادية
+            </a>
+        </div>
+    </div>
+    
+    <div class="success-message" id="successMessage"></div>
+</body>
+</html>
