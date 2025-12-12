@@ -33,9 +33,12 @@ MIN_ANOMALY_SCORE = -0.25 # Adjusted for better detection
 # Track last device_type used for each fingerprint (keyed by user_id)
 fingerprint_last_device: Dict[str, str] = {}
 
-# ================== FEATURE 2: Impossible Travel Detection ==================
+# ================== FEATURE 2: Impossible Travel Detection (Geographic Jump) ==================
 # Track last location and timestamp for each fingerprint (keyed by user_id)
 fingerprint_last_location: Dict[str, Tuple[str, datetime]] = {}  # {user_id: (city_name, timestamp)}
+
+# Track IP addresses and locations used by each user for geographic jump detection
+fingerprint_location_history: Dict[str, List[Tuple[str, str, datetime]]] = {}  # {user_id: [(ip_address, location, timestamp), ...]}
 
 # City coordinates dictionary (latitude, longitude) for major Saudi cities
 CITY_COORDINATES: Dict[str, Tuple[float, float]] = {
@@ -226,59 +229,107 @@ def detect_device_change(user_id: str, device_type: Optional[str]) -> Optional[s
     return None
 
 
-def detect_impossible_travel(user_id: str, location: Optional[str], current_time: datetime) -> Optional[str]:
+def detect_geographic_jump(user_id: str, ip_address: Optional[str], location: Optional[str], current_time: datetime) -> Optional[str]:
     """
-    FEATURE 2: Impossible Travel Detection (Geo Jump)
-    Detect when the same fingerprint appears in two far cities within an impossibly short time.
+    FEATURE 2: Geographic Jump Detection (القفزة الجغرافية)
+    Detect when the same user appears in multiple geographic locations in a short time period.
+    This includes:
+    1. Impossible travel (same user in far cities too quickly)
+    2. Multiple locations in short time (using multiple IPs/locations)
+    3. Suspicious location switching pattern
+    
     Returns reason string if detected, None otherwise.
     """
-    if not location:
+    if not location and not ip_address:
         return None
     
-    # Normalize location (title case for consistency)
-    location_normalized = location.strip().title()
+    location_normalized = location.strip().title() if location else "Unknown"
+    ip_address = ip_address or "Unknown"
     
-    # Get coordinates for current location
-    current_coords = get_city_coordinates(location_normalized)
-    if not current_coords:
-        # City not in our dictionary - skip detection but still track it
-        fingerprint_last_location[user_id] = (location_normalized, current_time)
-        return None
+    # Initialize history if needed
+    if user_id not in fingerprint_location_history:
+        fingerprint_location_history[user_id] = []
     
-    # Check if we have a previous location for this user
-    if user_id in fingerprint_last_location:
-        previous_location, previous_timestamp = fingerprint_last_location[user_id]
-        
-        # Get coordinates for previous location
-        previous_coords = get_city_coordinates(previous_location)
-        if previous_coords:
-            # Calculate distance between the two locations
-            distance_km = haversine_distance(
-                previous_coords[0], previous_coords[1],
-                current_coords[0], current_coords[1]
-            )
+    # Add current location/IP to history
+    fingerprint_location_history[user_id].append((ip_address, location_normalized, current_time))
+    
+    # Keep only last 2 hours of history (to prevent memory bloat)
+    two_hours_ago = current_time - timedelta(hours=2)
+    fingerprint_location_history[user_id] = [
+        (ip, loc, ts) for ip, loc, ts in fingerprint_location_history[user_id]
+        if ts >= two_hours_ago
+    ]
+    
+    recent_history = fingerprint_location_history[user_id]
+    
+    # Check 1: Impossible Travel (if we have location data)
+    if location and location_normalized != "Unknown":
+        current_coords = get_city_coordinates(location_normalized)
+        if current_coords and user_id in fingerprint_last_location:
+            previous_location, previous_timestamp = fingerprint_last_location[user_id]
+            previous_coords = get_city_coordinates(previous_location)
             
-            # Calculate time difference in seconds
-            time_diff_seconds = (current_time - previous_timestamp).total_seconds()
-            
-            # Only check if time difference is positive and reasonable (not negative/future)
-            if time_diff_seconds > 0:
-                # Calculate speed (km/h)
-                time_diff_hours = time_diff_seconds / 3600.0
-                speed_kmh = distance_km / time_diff_hours if time_diff_hours > 0 else 0
+            if previous_coords:
+                distance_km = haversine_distance(
+                    previous_coords[0], previous_coords[1],
+                    current_coords[0], current_coords[1]
+                )
+                time_diff_seconds = (current_time - previous_timestamp).total_seconds()
                 
-                # If speed > 900 km/h (faster than a jet airplane), flag as impossible travel
-                if speed_kmh > 900:
-                    reason = (
-                        f"Impossible travel detected: moved {distance_km:.2f} km "
-                        f"from {previous_location} to {location_normalized} "
-                        f"in {time_diff_seconds:.0f} seconds (speed = {speed_kmh:.2f} km/h)"
-                    )
-                    print(f"🚨 [IMPOSSIBLE TRAVEL] {reason}")
-                    return reason
+                if time_diff_seconds > 0:
+                    time_diff_hours = time_diff_seconds / 3600.0
+                    speed_kmh = distance_km / time_diff_hours if time_diff_hours > 0 else 0
+                    
+                    # If speed > 900 km/h, flag as impossible travel
+                    if speed_kmh > 900:
+                        reason = (
+                            f"Impossible travel: moved {distance_km:.2f} km "
+                            f"from {previous_location} to {location_normalized} "
+                            f"in {time_diff_seconds:.0f}s (speed = {speed_kmh:.2f} km/h)"
+                        )
+                        print(f"🚨 [GEOGRAPHIC JUMP - IMPOSSIBLE TRAVEL] {reason}")
+                        fingerprint_last_location[user_id] = (location_normalized, current_time)
+                        return reason
+        
+        # Update last location
+        fingerprint_last_location[user_id] = (location_normalized, current_time)
     
-    # Update the last location and timestamp for this user
-    fingerprint_last_location[user_id] = (location_normalized, current_time)
+    # Check 2: Multiple Locations in Short Time (within last 30 minutes)
+    thirty_minutes_ago = current_time - timedelta(minutes=30)
+    recent_locations = [
+        (ip, loc, ts) for ip, loc, ts in recent_history
+        if ts >= thirty_minutes_ago
+    ]
+    
+    # Count unique locations
+    unique_locations = set()
+    unique_ips = set()
+    for ip, loc, ts in recent_locations:
+        if loc and loc != "Unknown":
+            unique_locations.add(loc)
+        if ip and ip != "Unknown":
+            unique_ips.add(ip)
+    
+    # If user appears in 3+ different locations in 30 minutes → geographic jump attack
+    if len(unique_locations) >= 3:
+        locations_str = ", ".join(sorted(unique_locations))
+        reason = (
+            f"Geographic jump attack: user appeared in {len(unique_locations)} different locations "
+            f"in 30 minutes ({locations_str}). Possible VPN/Proxy hopping or account sharing."
+        )
+        print(f"🚨 [GEOGRAPHIC JUMP - MULTIPLE LOCATIONS] {reason}")
+        return reason
+    
+    # Check 3: Multiple IPs from different locations (even if location unknown)
+    if len(unique_ips) >= 3 and len(recent_locations) >= 3:
+        ips_str = ", ".join(list(unique_ips)[:3])  # Show first 3 IPs
+        reason = (
+            f"Geographic jump: user used {len(unique_ips)} different IP addresses "
+            f"in 30 minutes ({ips_str}). Suspicious location switching pattern."
+        )
+        print(f"🚨 [GEOGRAPHIC JUMP - IP SWITCHING] {reason}")
+        return reason
+    
     return None
 
 
@@ -855,16 +906,20 @@ def process_event(event: Event) -> Optional[ThreatFingerprint]:
             trigger_source = "DEVICE_CHANGE_DETECTION"
         print(f"⚠️ [DEVICE CHANGE] Risk score increased by +40 → {risk_score}")
 
-    # ================== FEATURE 2: Impossible Travel Detection ==================
+    # ================== FEATURE 2: Geographic Jump Detection (القفزة الجغرافية) ==================
     location = getattr(event, "location", None)
-    travel_reason = detect_impossible_travel(event.user_id, location, event.timestamp1)
-    if travel_reason:
-        risk_score += 50
-        detection_reasons.append(travel_reason)
+    ip_address = getattr(event, "ip_address", None) or event.ip_address if hasattr(event, "ip_address") else None
+    geo_jump_reason = detect_geographic_jump(event.user_id, ip_address, location, event.timestamp1)
+    if geo_jump_reason:
+        risk_score = max(risk_score, 85)  # High risk for geographic jumping
+        risk_score += 40  # Additional boost
+        detection_reasons.append(geo_jump_reason)
+        behavioral_features["geographic_jump_detected"] = True
+        behavioral_features["geo_jump_reason"] = geo_jump_reason
         if not should_create_fingerprint:
             should_create_fingerprint = True
-            trigger_source = "IMPOSSIBLE_TRAVEL_DETECTION"
-        print(f"⚠️ [IMPOSSIBLE TRAVEL] Risk score increased by +50 → {risk_score}")
+            trigger_source = "GEOGRAPHIC_JUMP_DETECTION"
+        print(f"🚨 [GEOGRAPHIC JUMP] Risk score boosted to {risk_score}")
 
     # ================== FEATURE 3: Multi-Account Linking Detection ==================
     multi_account_detected = False

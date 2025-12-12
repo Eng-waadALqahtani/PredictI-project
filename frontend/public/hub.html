@@ -14,13 +14,16 @@
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            padding: 40px 20px;
             color: #e7fdf8;
-            position: relative;
             overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* توسيط عمودي للمحتوى */
+            /* لم نعد بحاجة لـ padding-top ضخم لأن الأزرار ستكون صغيرة */
         }
 
-        /* الخلفية الديناميكية */
+        /* --- الخلفية (نفس الكود) --- */
         .dynamic-background {
             position: fixed;
             top: -10%;
@@ -31,448 +34,213 @@
             background-image: url("/image/background 1.webp");
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
             opacity: 0.7;
-            animation: backgroundZoom 15s ease-in-out infinite alternate,
-                       backgroundMove 20s ease-in-out infinite;
+            animation: backgroundZoom 15s ease-in-out infinite alternate;
         }
 
         .dynamic-background::before {
             content: "";
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                135deg,
-                rgba(102, 126, 234, 0.4) 0%,
-                rgba(118, 75, 162, 0.4) 50%,
-                rgba(0, 166, 155, 0.3) 100%
-            );
-            animation: gradientShift 10s ease-in-out infinite alternate,
-                       gradientRotate 25s linear infinite;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.4) 0%, rgba(118, 75, 162, 0.4) 50%, rgba(0, 166, 155, 0.3) 100%);
         }
 
-        .dynamic-background::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(
-                circle at 30% 50%,
-                rgba(102, 126, 234, 0.2) 0%,
-                transparent 50%
-            );
-            animation: radialMove 18s ease-in-out infinite alternate;
-        }
+        @keyframes backgroundZoom { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
 
-        /* Animations */
-        @keyframes backgroundZoom {
-            0% {
-                transform: scale(1) rotate(0deg);
-            }
-            50% {
-                transform: scale(1.15) rotate(1deg);
-            }
-            100% {
-                transform: scale(1.1) rotate(-1deg);
-            }
-        }
-
-        @keyframes backgroundMove {
-            0% {
-                background-position: 0% 0%;
-            }
-            25% {
-                background-position: 100% 0%;
-            }
-            50% {
-                background-position: 100% 100%;
-            }
-            75% {
-                background-position: 0% 100%;
-            }
-            100% {
-                background-position: 0% 0%;
-            }
-        }
-
-        @keyframes gradientShift {
-            0% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0.6;
-                transform: scale(1.1);
-            }
-        }
-
-        @keyframes gradientRotate {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes radialMove {
-            0% {
-                transform: translate(0%, 0%) scale(1);
-            }
-            50% {
-                transform: translate(20%, 30%) scale(1.2);
-            }
-            100% {
-                transform: translate(-20%, -30%) scale(0.9);
-            }
-        }
-
-        @media (prefers-reduced-motion: no-preference) {
-            .dynamic-background {
-                will-change: transform, background-position;
-            }
-        }
-
-        .content-overlay {
-            position: relative;
-            z-index: 1;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: block;
-            margin-bottom: 30px;
+        /* --- الأزرار العلوية (التصميم القديم - شكل كبسولة) --- */
+        .top-nav-btn {
+            position: fixed;
+            top: 40px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 24px;
+            border-radius: 99px; /* حواف دائرية بالكامل */
+            background: rgba(0, 0, 0, 0.4); /* خلفية داكنة خفيفة */
+            border: 1px solid rgba(0, 245, 200, 0.3);
+            backdrop-filter: blur(8px);
             color: #e7fdf8;
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            padding: 8px 18px;
-            border-radius: 999px;
-            border: 1px solid rgba(0, 245, 200, 0.35);
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(8px);
-            width: fit-content;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .back-link:hover {
-            transform: translateX(-3px);
-            background: rgba(0, 0, 0, 0.55);
+        .top-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.6);
+            transform: translateY(-3px);
+            border-color: rgba(0, 245, 200, 0.8);
+            box-shadow: 0 8px 20px rgba(0, 245, 200, 0.2);
+        }
+
+        /* تحديد المواقع بدقة */
+        .btn-right { right: 40px; } /* قاعدة البيانات يمين */
+        .btn-left { left: 40px; }   /* الرئيسية يسار */
+
+        .btn-icon { font-size: 18px; }
+
+        /* --- المحتوى الرئيسي --- */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 20px;
+            text-align: center;
+            margin-top: -20px; /* سحب المحتوى للأعلى قليلاً */
         }
 
         header {
-            text-align: center;
-            margin-bottom: 40px;
-            clear: both;
+            margin-bottom: 50px;
         }
 
         header h1 {
-            font-size: 40px;
-            margin-bottom: 8px;
+            font-size: 64px; /* تكبير العنوان بشكل كبير */
+            margin-bottom: 15px;
             color: #c5fff2;
             letter-spacing: 1px;
+            text-shadow: 0 0 30px rgba(0, 245, 200, 0.4);
         }
 
-        header h1 span {
-            color: #00f5c8;
+        header h1 span { color: #00f5c8; }
+        
+        header p { 
+            font-size: 22px; 
+            color: #d5f7ee; 
+            opacity: 0.9; 
+            font-weight: 300;
         }
 
-        header p {
-            font-size: 18px;
-            opacity: 0.9;
-            color: #d5f7ee;
-            margin-bottom: 6px;
-        }
-
-        header small {
-            font-size: 13px;
-            opacity: 0.75;
-        }
-
+        /* --- الشبكة والبطاقات --- */
         .pages-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 32px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px; /* تقليل المسافة بين البطاقات */
+            max-width: 1000px; /* تحديد عرض الشبكة لمنع تمدد البطاقات */
             margin: 0 auto;
-            max-width: 1050px;
-        }
-
-        @media (max-width: 1024px) {
-            .pages-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 24px 12px;
-            }
-
-            .pages-grid {
-                grid-template-columns: 1fr;
-            }
-
-            header h1 {
-                font-size: 32px;
-            }
         }
 
         .page-card {
-            background: rgba(0, 10, 10, 0.9);
+            background: rgba(0, 15, 20, 0.65);
             border-radius: 20px;
-            padding: 28px 24px 24px;
-            box-shadow: 0 18px 35px rgba(0, 0, 0, 0.75);
-            border: 1px solid rgba(0, 245, 200, 0.3);
+            padding: 30px 20px; /* تقليل الحشوة الداخلية */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.25s ease, box-shadow 0.25s ease,
-                border-color 0.25s ease, background 0.25s ease;
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+            position: relative;
         }
 
         .page-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 24px 45px rgba(0, 0, 0, 0.9);
-            border-color: rgba(0, 245, 200, 0.8);
-            background: rgba(0, 18, 18, 0.98);
+            background: rgba(0, 25, 30, 0.8);
+            border-color: rgba(0, 245, 200, 0.4);
         }
 
+        /* تصغير الكرات */
         .icon-sphere {
-            width: 86px;
-            height: 86px;
+            width: 75px; /* تصغير من 100px */
+            height: 75px;
             border-radius: 50%;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 0 6px rgba(0, 245, 200, 0.07),
-                0 10px 25px rgba(0, 0, 0, 0.7);
-            background: radial-gradient(
-                circle at 30% 20%,
-                #c5fff2 0%,
-                #00f5c8 35%,
-                #007f66 100%
-            );
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            background: radial-gradient(circle at 30% 20%, #c5fff2, #00f5c8, #007f66);
         }
+        
+        .icon-sphere.blue { background: radial-gradient(circle at 30% 20%, #d0e5ff, #4a7cff, #1b2755); }
+        .icon-sphere.purple { background: radial-gradient(circle at 30% 20%, #d5c7ff, #9b7bff, #251b55); }
 
-        .icon-sphere.blue {
-            background: radial-gradient(
-                circle at 30% 20%,
-                #d0e5ff 0%,
-                #4a7cff 30%,
-                #1b2755 100%
-            );
-        }
+        .sphere-inner { width: 55%; height: 55%; border-radius: 50%; background: rgba(0,0,0,0.25); }
 
-        .icon-sphere.purple {
-            background: radial-gradient(
-                circle at 30% 20%,
-                #d5c7ff 0%,
-                #9b7bff 30%,
-                #251b55 100%
-            );
-        }
-
-        .sphere-inner {
-            width: 55%;
-            height: 55%;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.25);
-            box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.15);
-        }
-
-        .page-card h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
-            font-weight: 700;
-            text-align: center;
-            color: #ffffff;
-        }
-
-        .page-card p {
-            font-size: 14px;
-            line-height: 1.7;
-            margin-bottom: 22px;
-            text-align: center;
-            color: #c6e6df;
-        }
+        .page-card h2 { font-size: 20px; margin-bottom: 8px; color: #fff; } /* تصغير خط عنوان البطاقة */
+        .page-card p { font-size: 13px; color: #a0ccc0; line-height: 1.5; margin-bottom: 20px; max-width: 90%; }
 
         .card-button {
             margin-top: auto;
-            width: 100%;
-            padding: 13px 20px;
-            border-radius: 999px;
-            font-size: 15px;
-            font-weight: 600;
-            text-align: center;
+            padding: 10px 25px; /* زر أصغر */
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 700;
             color: #00110f;
-            background: linear-gradient(90deg, #00f5c8, #00c2a0);
-            box-shadow: 0 10px 25px rgba(0, 245, 200, 0.35);
-            transition: transform 0.2s ease, box-shadow 0.2s ease,
-                filter 0.2s ease;
+            background: #00f5c8;
+            box-shadow: 0 5px 15px rgba(0, 245, 200, 0.3);
+        }
+        
+        .card-button.secondary { background: #4a7cff; color: white; box-shadow: 0 5px 15px rgba(74, 124, 255, 0.3); }
+        .card-button.warning { background: #ff4a4a; color: white; box-shadow: 0 5px 15px rgba(255, 74, 74, 0.3); }
+
+
+        /* --- التجاوب --- */
+        @media (max-width: 1024px) {
+            .pages-grid { grid-template-columns: repeat(2, 1fr); max-width: 700px; }
         }
 
-        .page-card:hover .card-button {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 30px rgba(0, 245, 200, 0.45);
-            filter: brightness(1.05);
-        }
-
-        .card-button.secondary {
-            background: linear-gradient(90deg, #4a7cff, #2359ff);
-            color: #e9f0ff;
-            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
-        }
-
-        .card-button.warning {
-            background: linear-gradient(90deg, #16c7b0, #02a58d);
+        @media (max-width: 768px) {
+            .pages-grid { grid-template-columns: 1fr; max-width: 350px; }
+            header h1 { font-size: 42px; }
+            .top-nav-btn { padding: 8px 16px; font-size: 12px; }
+            .top-nav-btn span { display: none; } /* إخفاء النص في الجوال والاكتفاء بالأيقونة */
+            .top-nav-btn .btn-icon { margin: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="dynamic-background" id="dynamicBg"></div>
 
-    <div class="container content-overlay">
-        <!-- رجعنا الرابط هنا نسبي index.html -->
-        <a href="index.html" class="back-link">← العودة للصفحة الرئيسية</a>
+    <div class="dynamic-background"></div>
 
+    <a href="database-view.html" class="top-nav-btn btn-right">
+        <span class="btn-icon">🗄️</span>
+        <span>قاعدة البيانات</span>
+    </a>
+
+    <a href="index.html" class="top-nav-btn btn-left">
+        <span class="btn-icon">🏠</span>
+        <span>الرئيسية</span>
+    </a>
+
+    <div class="container">
         <header>
             <h1><span>predictIQ</span> 🛡️</h1>
-            <p>اختر منصة التجربة</p>
-            <small>اختر إحدى المنصات لبدء تجربة نظام predictIQ لاكتشاف التهديدات السلوكية</small>
+            <p>منصة المحاكاة والتحليل السلوكي</p>
         </header>
 
         <div class="pages-grid">
-            <!-- لوحة التحكم -->
-            <a href="dashboard.html" class="page-card">
-                <div class="icon-sphere purple">
-                    <div class="sphere-inner"></div>
-                </div>
-                <h2>لوحة التحكم</h2>
-                <p>عرض البصمات المكتشفة مع الإحصاءات.</p>
-                <div class="card-button">مراقبة</div>
-            </a>
-
-            <!-- أبشر -->
             <a href="absher-login.html" class="page-card">
                 <div class="icon-sphere blue">
                     <div class="sphere-inner"></div>
                 </div>
-                <h2>أبشر - التحقق من الحجب</h2>
-                <p>صفحة تسجيل الدخول لمحاكاة تطبيق أبشر.</p>
-                <div class="card-button secondary">التحقق من الحجب</div>
+                <h2>أبشر</h2>
+                <p>محاكاة تسجيل الدخول واختبار أنظمة الحجب الذكي.</p>
+                <div class="card-button secondary">التحقق</div>
             </a>
 
-            <!-- توكلنا -->
-            <!-- هنا أصلحنا الرابط: بدون سلاش وبنفس اسم الملف -->
-            <a href="tawakkalna-login.html" class="page-card">
-                <div class="icon-sphere">
+            <a href="dashboard.html" class="page-card" style="border-color: rgba(0,245,200,0.3);">
+                <div class="icon-sphere purple">
                     <div class="sphere-inner"></div>
                 </div>
-                <h2>توكلنا - محاكاة الهجوم</h2>
-                <p>صفحة تسجيل الدخول لمحاكاة تطبيق توكلنا.</p>
-                <div class="card-button warning">محاكاة الهجوم</div>
+                <h2>لوحة التحكم</h2>
+                <p>مركز المراقبة الحية وتحليل البصمات السلوكية.</p>
+                <div class="card-button">مراقبة</div>
+            </a>
+
+            <a href="tawakkalna-login.html" class="page-card">
+                <div class="icon-sphere" style="background: radial-gradient(circle at 30% 20%, #ffaaaa, #ff4a4a, #990000);">
+                    <div class="sphere-inner"></div>
+                </div>
+                <h2>توكلنا</h2>
+                <p>سيناريو الهجوم السلوكي ومحاولة اختراق النمط.</p>
+                <div class="card-button warning">هجوم</div>
             </a>
         </div>
     </div>
-    
-    <script>
-        // Dynamic Background Effects with Enhanced Animations
-        window.addEventListener('DOMContentLoaded', () => {
-            const bg = document.getElementById('dynamicBg');
-            
-            if (!bg) {
-                console.error('❌ Background element not found');
-                return;
-            }
-            
-            console.log('🎨 Initializing dynamic background with animations...');
-            
-            // Enhanced Parallax effect on mouse move
-            let currentX = 0;
-            let currentY = 0;
-            let targetX = 0;
-            let targetY = 0;
-            
-            document.addEventListener('mousemove', (e) => {
-                const mouseX = e.clientX / window.innerWidth;
-                const mouseY = e.clientY / window.innerHeight;
-                
-                // Calculate target position
-                targetX = (mouseX - 0.5) * 50;
-                targetY = (mouseY - 0.5) * 50;
-            });
-            
-            // Smooth interpolation for mouse parallax
-            function animateParallax() {
-                currentX += (targetX - currentX) * 0.05;
-                currentY += (targetY - currentY) * 0.05;
-                
-                // Apply transform with existing CSS animations
-                const baseTransform = bg.style.transform || '';
-                bg.style.transform = `translate(${currentX}px, ${currentY}px) ${baseTransform}`;
-                
-                requestAnimationFrame(animateParallax);
-            }
-            animateParallax();
-            
-            // Enhanced parallax on scroll
-            let lastScrollY = window.scrollY;
-            let scrollOffset = 0;
-            let ticking = false;
-            
-            window.addEventListener('scroll', () => {
-                if (!ticking) {
-                    window.requestAnimationFrame(() => {
-                        const scrollY = window.scrollY;
-                        scrollOffset = scrollY * 0.3;
-                        
-                        // Update background position dynamically
-                        const currentBgPos = bg.style.backgroundPosition || 'center center';
-                        bg.style.backgroundPosition = `center ${scrollOffset}px`;
-                        
-                        lastScrollY = scrollY;
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            });
-            
-            // Add pulsing effect
-            let pulseScale = 1;
-            setInterval(() => {
-                pulseScale = pulseScale === 1 ? 1.02 : 1;
-                bg.style.filter = `brightness(${0.95 + pulseScale * 0.1})`;
-            }, 2000);
-            
-            // Check if background image loads
-            const img = new Image();
-            img.onload = () => {
-                console.log('✅ Background image loaded successfully');
-                bg.style.opacity = '0.7';
-                bg.style.transition = 'opacity 1s ease-in';
-            };
-            img.onerror = () => {
-                console.error('❌ Background image failed to load');
-                // Fallback to animated gradient
-                bg.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                bg.style.animation = 'gradientShift 10s ease-in-out infinite alternate';
-            };
-            img.src = '/image/background 1.webp';
-            
-            console.log('✅ Dynamic background animations initialized');
-        });
-    </script>
+
 </body>
 </html>
