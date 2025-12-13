@@ -12,30 +12,41 @@ const DEMO_MODE = true;
 
 // ============================================================================
 // ============================================================================
-// USER ID GENERATION (FIXED)
+// USER ID GENERATION (FORCE FRESH IDENTITY)
 // ============================================================================
 
 /**
- * Get or generate a unique User ID for this browser.
- * This ensures mobile and desktop are treated as different users.
+ * Get or generate a unique User ID.
+ * Contains logic to PURGE old demo IDs to prevent accidental blocking.
  */
 function getCurrentUserId() {
     const STORAGE_KEY = 'predictai_demo_user_id';
+    const OLD_FIXED_ID = 'user-8456123848'; // The ID that got everyone blocked
     
-    // Try to get stored User ID
     let userId = localStorage.getItem(STORAGE_KEY);
     
-    // If not found, generate a new unique ID
+    // 1. CRITICAL: Check if this is the old blocked ID and purge it
+    if (userId === OLD_FIXED_ID) {
+        console.warn("⚠️ Found blocked legacy ID. Purging and regenerating...");
+        userId = null;
+        localStorage.removeItem(STORAGE_KEY);
+    }
+    
+    // 2. Generate new ID if missing
     if (!userId) {
-        // Generate random ID: user-TIMESTAMP-RANDOM
-        const randomPart = Math.floor(Math.random() * 1000000);
+        // Generate a truly random ID: user-TIMESTAMP-RANDOM
+        const randomPart = Math.floor(Math.random() * 10000000);
         userId = `user-${Date.now()}-${randomPart}`;
         localStorage.setItem(STORAGE_KEY, userId);
-        console.log(`👤 [NEW USER] Generated new User ID: ${userId}`);
+        console.log(`👤 [NEW IDENTITY] Generated fresh User ID: ${userId}`);
     }
     
     return userId;
 }
+
+// Force a check immediately on load
+const currentId = getCurrentUserId();
+console.log(`✅ Current Identity: ${currentId}`);
 
 // ============================================================================
 // DEVICE ID GENERATION
@@ -84,7 +95,7 @@ function getCurrentPlatform() {
 
 // Debug: Log that events.js is loaded
 console.log("✅ events.js loaded - Centralized event tracking active");
-console.log(`   User ID: ${getCurrentUserId()}`);
+console.log(`   User ID: ${currentId}`);
 console.log(`   Device ID: ${getCurrentDeviceId()}`);
 console.log(`   API Base: ${API_BASE || '(same-origin)'}`);
 
@@ -271,11 +282,11 @@ function sendEvent(eventType, serviceName = null, extra = {}) {
         }
         
         if (data.fingerprint_generated) {
-            console.warn("⚠️ Threat Fingerprint Generated:", data.fingerprint_id);
+            console.log("🔍 [FINGERPRINT] Threat Fingerprint Generated:", data.fingerprint_id, "Risk Score:", data.risk_score || "N/A");
             if (!DEMO_MODE) {
-            showNotification("Threat detected! Check dashboard for details.", "warning");
+                showNotification("Threat detected! Check dashboard for details.", "warning");
             } else {
-                console.log("[DEMO_NOTIFICATION_SUPPRESSED] Threat detected! Check dashboard for details.");
+                console.log("[DEMO] Threat detected! Check dashboard for details.");
             }
         }
         
