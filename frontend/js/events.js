@@ -11,14 +11,30 @@ const API_BASE = (typeof window !== "undefined" && window.__PREDICTAI_API__) || 
 const DEMO_MODE = true;
 
 // ============================================================================
-// USER/DEVICE ID GENERATION
+// ============================================================================
+// USER ID GENERATION (FIXED)
 // ============================================================================
 
-// Generate unique user ID per device/browser
-let DEMO_USER_ID = localStorage.getItem('predictai_user_id');
-if (!DEMO_USER_ID) {
-    DEMO_USER_ID = "user-" + Math.floor(Math.random() * 10000000000);
-    localStorage.setItem('predictai_user_id', DEMO_USER_ID);
+/**
+ * Get or generate a unique User ID for this browser.
+ * This ensures mobile and desktop are treated as different users.
+ */
+function getCurrentUserId() {
+    const STORAGE_KEY = 'predictai_demo_user_id';
+    
+    // Try to get stored User ID
+    let userId = localStorage.getItem(STORAGE_KEY);
+    
+    // If not found, generate a new unique ID
+    if (!userId) {
+        // Generate random ID: user-TIMESTAMP-RANDOM
+        const randomPart = Math.floor(Math.random() * 1000000);
+        userId = `user-${Date.now()}-${randomPart}`;
+        localStorage.setItem(STORAGE_KEY, userId);
+        console.log(`👤 [NEW USER] Generated new User ID: ${userId}`);
+    }
+    
+    return userId;
 }
 
 // ============================================================================
@@ -54,10 +70,6 @@ function getOrGenerateDeviceId() {
     return deviceId;
 }
 
-function getCurrentUserId() {
-    return DEMO_USER_ID;
-}
-
 function getCurrentDeviceId() {
     return getOrGenerateDeviceId();
 }
@@ -72,7 +84,7 @@ function getCurrentPlatform() {
 
 // Debug: Log that events.js is loaded
 console.log("✅ events.js loaded - Centralized event tracking active");
-console.log(`   User ID: ${DEMO_USER_ID}`);
+console.log(`   User ID: ${getCurrentUserId()}`);
 console.log(`   Device ID: ${getCurrentDeviceId()}`);
 console.log(`   API Base: ${API_BASE || '(same-origin)'}`);
 
