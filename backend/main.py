@@ -109,9 +109,16 @@ def receive_event():
         if service_name and event_type == "view_service":
             event_type = f"view_service_{service_name}"
 
-        # Capture IP and User-Agent
-        ip_address = request.remote_addr or request.environ.get('HTTP_X_FORWARDED_FOR', 'unknown')
-        if ip_address == 'unknown' or not ip_address:
+        # Capture IP correctly on Render (behind Proxy)
+        if request.headers.getlist("X-Forwarded-For"):
+            # Render puts the real client IP first in the list
+            ip_address = request.headers.getlist("X-Forwarded-For")[0]
+        else:
+            # Fallback for local development
+            ip_address = request.remote_addr or request.environ.get('HTTP_X_FORWARDED_FOR', 'unknown')
+            
+        # Fallback if specific header is missing/empty
+        if not ip_address or ip_address == 'unknown':
             ip_address = request.environ.get('REMOTE_ADDR', 'unknown')
         
         user_agent = request.headers.get("User-Agent", "unknown")

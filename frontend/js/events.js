@@ -14,7 +14,12 @@ const DEMO_MODE = true;
 // USER/DEVICE ID GENERATION
 // ============================================================================
 
-const DEMO_USER_ID = "user-8456123848";     // Fixed ID for demo (can be changed later)
+// Generate unique user ID per device/browser
+let DEMO_USER_ID = localStorage.getItem('predictai_user_id');
+if (!DEMO_USER_ID) {
+    DEMO_USER_ID = "user-" + Math.floor(Math.random() * 10000000000);
+    localStorage.setItem('predictai_user_id', DEMO_USER_ID);
+}
 
 // ============================================================================
 // DEVICE ID GENERATION
@@ -67,7 +72,7 @@ function getCurrentPlatform() {
 
 // Debug: Log that events.js is loaded
 console.log("✅ events.js loaded - Centralized event tracking active");
-console.log(`   Demo User ID: ${DEMO_USER_ID}`);
+console.log(`   User ID: ${DEMO_USER_ID}`);
 console.log(`   Device ID: ${getCurrentDeviceId()}`);
 console.log(`   API Base: ${API_BASE || '(same-origin)'}`);
 
