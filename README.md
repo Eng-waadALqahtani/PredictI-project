@@ -1,4 +1,4 @@
-# PredictIQ - Digital Threat Fingerprint System
+# PredictAI - Digital Threat Fingerprint System
 
 A full-stack security system that detects and fingerprints digital threats using machine learning and behavioral analysis.
 

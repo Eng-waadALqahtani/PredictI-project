@@ -14,14 +14,14 @@ if (typeof window !== "undefined") {
                         window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
         
         if (isRender) {
-            window.API_BASE = "https://predictiq-backend.onrender.com";
+            window.API_BASE = "https://predictai-backend.onrender.com";
         } else {
             window.API_BASE = `${window.location.protocol}//${window.location.hostname}:5000`;
         }
     }
 }
 const API_BASE = window.API_BASE || (window.location.hostname.includes("render") || window.location.hostname.includes("onrender.com")
-    ? "https://predictiq-backend.onrender.com"
+    ? "https://predictai-backend.onrender.com"
     : `${window.location.protocol}//${window.location.hostname}:5000`);
 
 // DEMO MODE: Set to true to suppress visible notifications during live demo

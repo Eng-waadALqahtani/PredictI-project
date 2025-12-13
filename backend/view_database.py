@@ -1,5 +1,5 @@
 """
-Script to view PredictIQ database contents.
+Script to view PredictAI database contents.
 Run: python backend/view_database.py
 """
 
@@ -18,6 +18,7 @@ if sys.platform == 'win32':
 sys.path.insert(0, os.path.dirname(__file__))
 
 from db import get_db_session, FingerprintDB, init_db
+from sqlalchemy import func
 
 def print_header(text):
     print("\n" + "="*70)
@@ -99,7 +100,7 @@ def view_statistics():
         blocked = session.query(FingerprintDB).filter(FingerprintDB.status == "BLOCKED").count()
         cleared = session.query(FingerprintDB).filter(FingerprintDB.status == "CLEARED").count()
         
-        high_risk = session.query(FingerprintDB).filter(FingerprintDB.risk_score >= 80).count()
+        high_risk = session.query(FingerprintDB).filter(FingerprintDB.risk_score >= 85).count()
         medium_risk = session.query(FingerprintDB).filter(
             FingerprintDB.risk_score >= 50, 
             FingerprintDB.risk_score < 80
@@ -119,9 +120,7 @@ def view_statistics():
         
         # Average risk score
         if total > 0:
-            avg_risk = session.query(FingerprintDB).with_entities(
-                db.func.avg(FingerprintDB.risk_score)
-            ).scalar()
+            avg_risk = session.query(func.avg(FingerprintDB.risk_score)).scalar()
             print(f"\n📈 متوسط درجة الخطر: {avg_risk:.2f}/100")
         
     finally:
@@ -175,7 +174,7 @@ def main():
     """Main function"""
     import argparse
     
-    parser = argparse.ArgumentParser(description='عرض قاعدة بيانات PredictIQ')
+    parser = argparse.ArgumentParser(description='عرض قاعدة بيانات PredictAI')
     parser.add_argument('--user', type=str, help='عرض بصمات مستخدم معين')
     parser.add_argument('--stats', action='store_true', help='عرض الإحصائيات فقط')
     parser.add_argument('--export', type=str, metavar='FILE', help='تصدير البيانات إلى ملف JSON')

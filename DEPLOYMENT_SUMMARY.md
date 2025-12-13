@@ -1,4 +1,4 @@
-# 🚀 PredictIQ Deployment Preparation - Summary
+# 🚀 PredictAI Deployment Preparation - Summary
 
 ## ✅ Completed Tasks
 
@@ -13,14 +13,14 @@
 
 ### 2. **Render Configuration (render.yaml)**
 - ✅ Created `render.yaml` with proper configuration:
-  - Service name: `predictiq-backend`
+  - Service name: `predictai-backend`
   - Environment: Python 3.10
   - Start command: `python backend/main.py`
   - Port: 5000 (via environment variable)
 
 ### 3. **Dynamic API Base URL**
 - ✅ Updated `frontend/js/events.js` to automatically detect environment:
-  - **Production (Render)**: `https://predictiq-backend.onrender.com`
+  - **Production (Render)**: `https://predictai-backend.onrender.com`
   - **Local Development**: `http://localhost:5000`
 - ✅ Updated `frontend/public/dashboard.html` with same dynamic logic
 
@@ -106,7 +106,7 @@ hakathoon/
    const isRender = window.location.hostname.includes("render") || 
                    window.location.hostname.includes("onrender.com");
    const API_BASE = isRender 
-       ? "https://predictiq-backend.onrender.com"
+       ? "https://predictai-backend.onrender.com"
        : `${window.location.protocol}//${window.location.hostname}:5000`;
    ```
 
@@ -184,19 +184,19 @@ The following are automatically excluded via `.gitignore`:
 ### Test API:
 ```bash
 # Health check
-curl https://predictiq-backend.onrender.com/api/v1/debug
+curl https://predictai-backend.onrender.com/api/v1/debug
 
 # Get fingerprints
-curl https://predictiq-backend.onrender.com/api/v1/fingerprints
+curl https://predictai-backend.onrender.com/api/v1/fingerprints
 
 # Send test event
-curl -X POST https://predictiq-backend.onrender.com/api/v1/event \
+curl -X POST https://predictai-backend.onrender.com/api/v1/event \
   -H "Content-Type: application/json" \
   -d '{"event_type": "login_attempt", "user_id": "test", "device_id": "test", "timestamp1": "2024-01-01T00:00:00Z"}'
 ```
 
 ### Test Frontend:
-- Visit: `https://predictiq-backend.onrender.com/`
+- Visit: `https://predictai-backend.onrender.com/`
 - Navigate to dashboard and login pages
 - Verify events are being sent and processed
 

@@ -1,7 +1,7 @@
-# PredictIQ - Digital Threat Fingerprint
+# PredictAI - Digital Threat Fingerprint
 ## Deployment Guide for Render
 
-This guide will help you deploy the PredictIQ security system to Render.
+This guide will help you deploy the PredictAI security system to Render.
 
 ---
 
@@ -42,10 +42,10 @@ git push origin main
 2. **Create New Web Service**
    - Click "New +" → "Web Service"
    - Connect your GitHub repository
-   - Select the repository containing PredictIQ
+   - Select the repository containing PredictAI
 
 3. **Configure Service**
-   - **Name**: `predictiq-backend`
+   - **Name**: `predictai-backend`
    - **Environment**: `Python 3`
    - **Build Command**: (leave empty - Render will auto-detect)
    - **Start Command**: `python backend/main.py`
@@ -60,7 +60,7 @@ git push origin main
    - Render will automatically:
      - Install dependencies from `requirements.txt`
      - Run the Flask application
-     - Provide a public URL (e.g., `https://predictiq-backend.onrender.com`)
+     - Provide a public URL (e.g., `https://predictai-backend.onrender.com`)
 
 ---
 
@@ -69,7 +69,7 @@ git push origin main
 ### API Base URL
 
 The frontend automatically detects the environment:
-- **Production (Render)**: Uses `https://predictiq-backend.onrender.com`
+- **Production (Render)**: Uses `https://predictai-backend.onrender.com`
 - **Local Development**: Uses `http://localhost:5000`
 
 This is configured in `frontend/js/events.js`:
@@ -79,7 +79,7 @@ const isRender = window.location.hostname.includes("render") ||
                 window.location.hostname.includes("onrender.com");
 
 const API_BASE = isRender 
-    ? "https://predictiq-backend.onrender.com"
+    ? "https://predictai-backend.onrender.com"
     : `${window.location.protocol}//${window.location.hostname}:5000`;
 ```
 
@@ -146,13 +146,13 @@ hakathoon/
 
 ```bash
 # Check service health
-curl https://predictiq-backend.onrender.com/api/v1/debug
+curl https://predictai-backend.onrender.com/api/v1/debug
 
 # Get fingerprints
-curl https://predictiq-backend.onrender.com/api/v1/fingerprints
+curl https://predictai-backend.onrender.com/api/v1/fingerprints
 
 # Send test event
-curl -X POST https://predictiq-backend.onrender.com/api/v1/event \
+curl -X POST https://predictai-backend.onrender.com/api/v1/event \
   -H "Content-Type: application/json" \
   -d '{
     "event_type": "login_attempt",
@@ -165,10 +165,10 @@ curl -X POST https://predictiq-backend.onrender.com/api/v1/event \
 ### Test Frontend Pages
 
 Visit these URLs after deployment:
-- `https://predictiq-backend.onrender.com/` - Main hub
-- `https://predictiq-backend.onrender.com/dashboard.html` - Dashboard
-- `https://predictiq-backend.onrender.com/absher-login.html` - Absher login
-- `https://predictiq-backend.onrender.com/tawakkalna-login.html` - Tawakkalna login
+- `https://predictai-backend.onrender.com/` - Main hub
+- `https://predictai-backend.onrender.com/dashboard.html` - Dashboard
+- `https://predictai-backend.onrender.com/absher-login.html` - Absher login
+- `https://predictai-backend.onrender.com/tawakkalna-login.html` - Tawakkalna login
 
 ---
 

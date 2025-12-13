@@ -16,7 +16,7 @@
 
 2. **إنشاء مستودع جديد** (إذا لم يكن موجوداً)
    - **Repository name**: `PredictI-project`
-   - **Description**: `PredictIQ - Digital Threat Fingerprint System`
+   - **Description**: `PredictAI - Digital Threat Fingerprint System`
    - اختر **Public** أو **Private**
    - **لا** تضع علامة على "Initialize with README"
    - اضغط **Create repository**
@@ -57,7 +57,7 @@
    - اسحب الملفات: `requirements.txt`, `render.yaml`, `.gitignore`
 
 4. **Commit**
-   - اكتب رسالة: `Initial deployment - PredictIQ project`
+   - اكتب رسالة: `Initial deployment - PredictAI project`
    - اضغط **Commit changes**
 
 ---
@@ -101,13 +101,13 @@ https://github.com/Eng-waadALqahtani/PredictI-project
    - اختر المستودع: `Eng-waadALqahtani/PredictI-project`
 
 3. **إعدادات الخدمة**
-   - **Name**: `predictiq-backend`
+   - **Name**: `predictai-backend`
    - Render سيكتشف `render.yaml` تلقائياً
    - اضغط **Create Web Service**
 
 4. **انتظر النشر**
    - Render سيقوم بتثبيت التبعيات تلقائياً
-   - ستحصل على رابط مثل: `https://predictiq-backend.onrender.com`
+   - ستحصل على رابط مثل: `https://predictai-backend.onrender.com`
 
 ---
 

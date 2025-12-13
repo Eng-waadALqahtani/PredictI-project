@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>predictIQ - اختر منصة التجربة</title>
+    <title>predictAI - اختر منصة التجربة</title>
     <style>
         * {
             margin: 0;
@@ -208,7 +208,7 @@
 
     <div class="container">
         <header>
-            <h1><span>predictIQ</span> 🛡️</h1>
+            <h1><span>predictAI</span> 🛡️</h1>
             <p>منصة المحاكاة والتحليل السلوكي</p>
         </header>
 
@@ -242,5 +242,13 @@
         </div>
     </div>
 
+    <!-- Set API base for local development (uses same-origin on Render by default) -->
+    <script>
+        // Only set for local development, Render uses same-origin (empty string)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.__PREDICTAI_API__ = 'http://localhost:5000';
+        }
+    </script>
+    <script src="/js/events.js" defer></script>
 </body>
 </html>

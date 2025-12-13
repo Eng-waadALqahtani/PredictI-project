@@ -15,7 +15,7 @@
 
 2. **املأ البيانات:**
    - **Repository name**: `PredictI-project`
-   - **Description**: `PredictIQ - Digital Threat Fingerprint System`
+   - **Description**: `PredictAI - Digital Threat Fingerprint System`
    - اختر **Public** أو **Private**
    - ⚠️ **لا تضع علامة على "Initialize with README"**
    - ⚠️ **لا تضع علامة على "Add .gitignore"**
@@ -46,7 +46,7 @@ git push -u origin main
 
 1. اذهب إلى: https://github.com/settings/tokens
 2. اضغط **"Generate new token"** → **"Generate new token (classic)"**
-3. اكتب اسم للـ Token (مثل: `PredictIQ-Deployment`)
+3. اكتب اسم للـ Token (مثل: `PredictAI-Deployment`)
 4. اختر الصلاحيات:
    - ✅ `repo` (Full control of private repositories)
 5. اضغط **"Generate token"**

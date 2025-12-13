@@ -92,17 +92,17 @@ def get_database_url() -> str:
     Get database URL from environment variable or default to SQLite.
     
     Environment variable: DATABASE_URL
-    Default: sqlite:///predictiq.db (SQLite file in project root)
+    Default: sqlite:///predictai.db (SQLite file in project root)
     
     Examples:
-    - SQLite: sqlite:///predictiq.db
-    - PostgreSQL: postgresql://user:password@localhost:5432/predictiq
+    - SQLite: sqlite:///predictai.db
+    - PostgreSQL: postgresql://user:password@localhost:5432/predictai
     """
     database_url = os.environ.get('DATABASE_URL')
     if database_url:
         return database_url
     # Default to SQLite
-    db_path = os.path.join(os.path.dirname(__file__), '..', 'predictiq.db')
+    db_path = os.path.join(os.path.dirname(__file__), '..', 'predictai.db')
     return f'sqlite:///{db_path}'
 
 

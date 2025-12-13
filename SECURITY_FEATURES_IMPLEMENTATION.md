@@ -1,7 +1,7 @@
 # Security Features Implementation Summary
 
 ## Overview
-Two new security detection features have been successfully integrated into the PredictIQ backend:
+Two new security detection features have been successfully integrated into the PredictAI backend:
 
 1. **Device Change Detection** - Detects when the same fingerprint is used from different device types
 2. **Impossible Travel Detection** - Detects when the same fingerprint appears in far cities within impossibly short time

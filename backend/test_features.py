@@ -1,5 +1,5 @@
 """
-Test script to verify all features of PredictIQ:
+Test script to verify all features of PredictAI:
 1. Database operations
 2. Multi-account linking detection
 3. Browser-hopping detection
@@ -432,7 +432,7 @@ def main():
     """Run all tests"""
     print(f"\n{Colors.BOLD}{Colors.OKBLUE}")
     print("╔════════════════════════════════════════════════════════════╗")
-    print("║         PredictIQ - Feature Testing Suite                 ║")
+    print("║         PredictAI - Feature Testing Suite                 ║")
     print("╚════════════════════════════════════════════════════════════╝")
     print(Colors.ENDC)
     

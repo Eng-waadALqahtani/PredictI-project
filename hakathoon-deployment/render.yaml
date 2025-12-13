@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: predictiq-backend
+    name: predictai-backend
     env: python
     buildCommand: ""
     startCommand: python backend/main.py

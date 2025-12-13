@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أبشر - تسجيل الدخول</title>
+    <!-- Set API base for local development (uses same-origin on Render by default) -->
+    <script>
+        // Only set for local development, Render uses same-origin (empty string)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.__PREDICTAI_API__ = 'http://localhost:5000';
+        }
+    </script>
     <script src="/js/events.js" defer></script>
     <style>
         * {
@@ -612,6 +619,7 @@
                                 id="username" 
                                 name="username" 
                                 placeholder="اسم المستخدم أو رقم الهوية"
+                                autocomplete="username"
                                 required
                                 maxlength="10"
                             >
@@ -627,6 +635,7 @@
                                 id="password" 
                                 name="password" 
                                 placeholder="كلمة المرور"
+                                autocomplete="current-password"
                                 required
                             >
                             <button type="button" class="password-toggle" onclick="togglePassword()">

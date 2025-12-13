@@ -31,10 +31,10 @@ def load_model() -> IsolationForest:
         # Load the model from the file path
         with open(MODEL_PATH, 'rb') as f:
             _isolation_forest_model = pickle.load(f)
-        print("✅ [PREDICTIQ] ML Model loaded successfully from disk.")
+        print("✅ [PREDICTAI] ML Model loaded successfully from disk.")
     except FileNotFoundError:
         # Create a dummy model if file is missing (for demo purposes)
-        print("⚠️ [PREDICTIQ] Model file not found. Initializing dummy model.")
+        print("⚠️ [PREDICTAI] Model file not found. Initializing dummy model.")
         _isolation_forest_model = IsolationForest(
             contamination=0.1,
             random_state=42,

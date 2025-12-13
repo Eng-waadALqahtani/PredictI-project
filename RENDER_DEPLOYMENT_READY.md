@@ -1,4 +1,4 @@
-# ✅ PredictIQ - Ready for Render Deployment
+# ✅ PredictAI - Ready for Render Deployment
 
 ## 🎯 Project Status: **PRODUCTION READY**
 
@@ -42,7 +42,7 @@ All deployment preparations are complete. The project is ready to be deployed on
 
 2. **`frontend/js/events.js`**
    - ✅ Dynamic API base URL detection
-   - ✅ Production: `https://predictiq-backend.onrender.com`
+   - ✅ Production: `https://predictai-backend.onrender.com`
    - ✅ Development: `http://localhost:5000`
 
 3. **`frontend/public/dashboard.html`**
@@ -79,7 +79,7 @@ hakathoon/
 
 ### 1. **Dynamic API Base URL**
 Automatically detects environment:
-- **Render/Production**: `https://predictiq-backend.onrender.com`
+- **Render/Production**: `https://predictai-backend.onrender.com`
 - **Local Development**: `http://localhost:5000`
 
 ### 2. **CORS Configuration**
@@ -117,8 +117,8 @@ git push origin main
 
 ### 3. Verify Deployment
 - Check logs in Render dashboard
-- Test API: `https://predictiq-backend.onrender.com/api/v1/debug`
-- Test frontend: `https://predictiq-backend.onrender.com/`
+- Test API: `https://predictai-backend.onrender.com/api/v1/debug`
+- Test frontend: `https://predictai-backend.onrender.com/`
 
 ---
 

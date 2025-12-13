@@ -1,11 +1,11 @@
 # ============================================================================
-# PredictIQ - Create Deployment ZIP Script
+# PredictAI - Create Deployment ZIP Script
 # ============================================================================
 # This script creates a clean ZIP file ready for Render deployment
 # Excludes: venv, __pycache__, .ipynb_checkpoints, and other unnecessary files
 # ============================================================================
 
-Write-Host "Creating deployment ZIP for PredictIQ..." -ForegroundColor Cyan
+Write-Host "Creating deployment ZIP for PredictAI..." -ForegroundColor Cyan
 Write-Host ""
 
 # Get the script directory (project root)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>predictIQ - لوحة التحكم</title>
+    <title>predictAI - لوحة التحكم</title>
     <style>
         * {
             margin: 0;
@@ -484,7 +484,7 @@
     
     <div class="container content-overlay">
         <header>
-            <h1>🛡️ predictIQ - لوحة التحكم</h1>
+            <h1>🛡️ predictAI - لوحة التحكم</h1>
             <div class="controls">
                 <a href="/" class="home-link">← العودة للصفحة الرئيسية</a>
                 <button class="refresh-button" onclick="refreshCurrentTab()">
@@ -604,7 +604,7 @@
                         (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1");
         
         const API_BASE = isRender 
-            ? "https://predictiq-backend.onrender.com"
+            ? "https://predictai-backend.onrender.com"
             : `${window.location.protocol}//${window.location.hostname}:5000`;
         
         // Track previous fingerprint count for notifications

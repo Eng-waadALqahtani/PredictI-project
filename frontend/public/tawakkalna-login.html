@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>توكلنا - تسجيل الدخول</title>
+    <!-- Set API base for local development (uses same-origin on Render by default) -->
+    <script>
+        // Only set for local development, Render uses same-origin (empty string)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.__PREDICTAI_API__ = 'http://localhost:5000';
+        }
+    </script>
     <script src="/js/events.js" defer></script>
     <style>
         * {
@@ -11,7 +18,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', 'Arial', 'Tahoma', 'Cairo', sans-serif;
             background: #f5f7fa;
@@ -23,7 +30,7 @@
             justify-content: center;
             padding: 20px;
         }
-
+        
         /* Top Bar */
         .top-bar {
             position: fixed;
@@ -39,29 +46,29 @@
             align-items: center;
             z-index: 1000;
         }
-
+        
         .top-bar .right {
             flex: 1;
         }
-
+        
         .top-bar .right h1 {
             font-size: 24px;
             font-weight: 700;
             color: #009688;
             margin-bottom: 5px;
         }
-
+        
         .top-bar .right p {
             font-size: 12px;
             color: #666;
         }
-
+        
         .top-bar .left {
             display: flex;
             align-items: center;
             gap: 15px;
         }
-
+        
         .home-link {
             color: #009688;
             text-decoration: none;
@@ -72,14 +79,14 @@
             border-radius: 20px;
             transition: all 0.3s;
         }
-
+        
         .home-link:hover {
             background: #009688;
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 150, 136, 0.3);
         }
-
+        
         /* Login Card */
         .login-container {
             background: white;
@@ -98,7 +105,7 @@
             margin-bottom: 10px;
             text-align: center;
         }
-
+        
         .login-container .subtitle {
             font-size: 14px;
             color: #666;
@@ -106,11 +113,11 @@
             margin-bottom: 35px;
             line-height: 1.6;
         }
-
+        
         .form-group {
             margin-bottom: 25px;
         }
-
+        
         .form-group label {
             display: block;
             font-size: 14px;
@@ -118,7 +125,7 @@
             color: #333;
             margin-bottom: 8px;
         }
-
+        
         .form-group input {
             width: 100%;
             padding: 14px 16px;
@@ -128,12 +135,12 @@
             font-family: inherit;
             transition: border-color 0.3s;
         }
-
+        
         .form-group input:focus {
             outline: none;
             border-color: #009688;
         }
-
+        
         .login-button {
             width: 100%;
             padding: 16px;
@@ -147,16 +154,16 @@
             transition: transform 0.2s, box-shadow 0.2s;
             margin-top: 10px;
         }
-
+        
         .login-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 150, 136, 0.4);
         }
-
+        
         .login-button:active {
             transform: translateY(0);
         }
-
+        
         .success-message {
             margin-top: 15px;
             padding: 12px;
@@ -168,7 +175,7 @@
             text-align: center;
             display: none;
         }
-
+        
         .success-message.show {
             display: block;
             animation: fadeIn 0.3s ease;
@@ -185,12 +192,12 @@
             text-align: center;
             line-height: 1.6;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
         /* Responsive */
         @media (max-width: 768px) {
             .top-bar { padding: 12px 20px; flex-direction: column; gap: 10px; }
@@ -206,7 +213,7 @@
         <div class="right">
             <h1>توكلنا – محاكاة الخدمات الحكومية</h1>
             <p>(Digital Threat Fingerprint) نسخة تجريبية لأغراض الأمن السيبراني</p>
-        </div>
+            </div>
         <div class="left">
             <a href="/index.html" class="home-link">🏠 الصفحة الرئيسية</a>
         </div>
@@ -215,41 +222,43 @@
     <main class="login-container">
         <h2>تسجيل الدخول</h2>
         <p class="subtitle">أدخل بياناتك التجريبية للوصول إلى المحفظة الرقمية والخدمات الحكومية.</p>
-
+            
         <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
+                <div class="form-group">
                 <label for="idNumber">رقم الهوية الوطنية / رقم الجوال</label>
-                <input 
-                    type="text" 
-                    id="idNumber" 
-                    name="idNumber" 
+                    <input 
+                        type="text" 
+                        id="idNumber" 
+                        name="idNumber" 
                     placeholder="8765432134"
-                    required
-                    maxlength="10"
-                >
-            </div>
-
-            <div class="form-group">
+                    autocomplete="username"
+                        required
+                        maxlength="10"
+                    >
+                </div>
+                
+                <div class="form-group">
                 <label for="password">كلمة المرور / رمز الدخول</label>
-                <input 
+                    <input 
                     type="password" 
                     id="password" 
                     name="password" 
                     placeholder="••••••••"
-                    required
-                >
-            </div>
-
+                    autocomplete="current-password"
+                        required
+                    >
+                </div>
+                
             <button type="submit" id="loginButton" class="login-button">تسجيل الدخول</button>
 
             <div class="success-message" id="successMessage">
                 تم تسجيل الدخول بنجاح (محاكاة)، سيتم نقلك للخدمات …
-            </div>
-
+                </div>
+                
             <div class="warning-box">
                 ⚠️ هذه نسخة تجريبية لأغراض الأمن السيبراني، وليست مرتبطة بالبيانات الحقيقية.
-            </div>
-        </form>
+                </div>
+            </form>
     </main>
 
     <script>
@@ -278,12 +287,12 @@
                         </p>
                         <div style="font-size: 13px; color: #777; margin-bottom: 25px;">
                             يرجى الانتظار حتى يقوم المسؤول بمراجعة حالتك.
-                        </div>
+        </div>
                         <button onclick="location.reload()" 
                                 style="padding: 12px 30px; background: #c62828; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.3s;">
                             تحديث الحالة
-                        </button>
-                    </div>
+                    </button>
+                </div>
                 `;
                 document.body.appendChild(overlay);
             }
@@ -295,7 +304,7 @@
             
             overlay.style.display = 'flex';
         }
-
+        
         // إخفاء نافذة الحجب
         function hideBlockOverlay() {
             const overlay = document.getElementById('block-overlay');
@@ -317,7 +326,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, precheck_only: true })
                 });
-
+    
                 if (response.status === 403) {
                     const result = await response.json();
                     showBlockOverlay(result.message);
@@ -337,7 +346,7 @@
                 return false;
             }
         }
-
+        
         // إعادة التحقق (تستخدم في الـ polling)
         async function recheckBlockStatus(userId) {
             await checkIfBlocked(userId);
@@ -345,15 +354,15 @@
 
         // === نظام التحقق المستمر (Polling System) ===
         let blockStatusCheckInterval = null;
-
+        
         function startBlockStatusPolling() {
             // إيقاف أي مؤقت سابق
             if (blockStatusCheckInterval) {
                 clearInterval(blockStatusCheckInterval);
             }
-
+            
             console.log(`[TAWAKKALNA] Starting active polling for block status...`);
-
+            
             // التحقق كل 2.5 ثانية
             blockStatusCheckInterval = setInterval(() => {
                 // 1. محاولة جلب الهوية من حقل الإدخال مباشرة (الأكثر دقة أثناء الكتابة)
@@ -365,21 +374,21 @@
 
                 // نستخدم المعرف الموجود (الأولوية لما هو مكتوب في الحقل إذا كان طويلاً بما يكفي)
                 let userIdToCheck = (inputId && inputId.length > 5) ? inputId : storedId;
-
+                
                 if (userIdToCheck) {
                     // console.log(`Checking status for: ${userIdToCheck}`);
                     recheckBlockStatus(userIdToCheck);
                 }
             }, 2500); 
         }
-
+        
         function stopBlockStatusPolling() {
             if (blockStatusCheckInterval) {
                 clearInterval(blockStatusCheckInterval);
                 blockStatusCheckInterval = null;
             }
         }
-
+        
         // الاستماع لأحداث Dashboard عبر النوافذ (Cross-tab communication)
         window.addEventListener('storage', function(e) {
             if (e.key === 'fingerprint_updated') {
@@ -417,7 +426,7 @@
             if (detail.user_id === currentUserId && detail.action === 'unblock') {
                 console.log('[TAWAKKALNA] Same-tab unblock detected - immediately rechecking...');
                 recheckBlockStatus(currentUserId);
-            }
+        }
         });
 
         // التعامل مع زر تسجيل الدخول
@@ -426,12 +435,12 @@
             
             const idNumber = document.getElementById('idNumber').value.trim();
             const password = document.getElementById('password').value;
-
+    
             if (!idNumber || !password) {
                 alert('يرجى إدخال جميع الحقول');
                 return;
             }
-
+    
             // حفظ المستخدم الحالي
             if (typeof setUserId === 'function') {
                 setUserId(idNumber);
@@ -443,7 +452,7 @@
             if (typeof sendEvent === 'function') {
                 try { sendEvent("login_attempt", null, { page: "tawakkalna-login" }); } catch (e) {}
             }
-
+            
             // التحقق النهائي قبل السماح بالدخول
             try {
                 const apiBase = window.API_BASE || 'http://localhost:5000';
@@ -452,23 +461,23 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: idNumber })
                 });
-
+                
                 if (response.status === 403) {
                     // محظور
-                    const result = await response.json();
+                const result = await response.json();
                     showBlockOverlay(result.message);
                     if (typeof sendEvent === 'function') {
                         try { sendEvent('login_blocked', null, { reason: 'high_risk_fingerprint' }); } catch(e){}
                     }
                     return;
                 }
-
+                
                 // مسموح
                 const successMessage = document.getElementById('successMessage');
                 successMessage.classList.add('show');
 
                 setTimeout(() => {
-                    if (typeof sendEvent === 'function') {
+                if (typeof sendEvent === 'function') {
                         try { sendEvent("login_success", null, { page: "tawakkalna-login" }); } catch (e) {}
                     }
                 }, 300);
@@ -476,29 +485,29 @@
                 setTimeout(() => {
                     window.location.href = "/tawakkalna-services.html";
                 }, 1200);
-
+    
             } catch (error) {
                 console.error('Error during login check:', error);
                 alert('حدث خطأ أثناء الاتصال بالخادم');
             }
         }
-
+    
         // عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             // محاولة ملء الحقل إذا كان المستخدم معروفاً سابقاً
             const savedId = localStorage.getItem('user_id');
             if (savedId) {
                 document.getElementById('idNumber').value = savedId;
-            }
-
+        }
+        
             // بدء التحقق الدوري فوراً
             startBlockStatusPolling();
         });
-
+            
         // إيقاف التحقق عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
             stopBlockStatusPolling();
         });
-    </script>
+    </script>    
 </body>
 </html>

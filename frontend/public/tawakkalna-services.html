@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>توكلنا - المحفظة الرقمية والخدمات</title>
+    <!-- Set API base for local development (uses same-origin on Render by default) -->
+    <script>
+        // Only set for local development, Render uses same-origin (empty string)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            window.__PREDICTAI_API__ = 'http://localhost:5000';
+        }
+    </script>
     <script src="/js/events.js" defer></script>
     <style>
         * {
@@ -242,7 +249,7 @@
         </div>
         <div class="left">
             <a href="/hub.html" class="home-link">🏠 الصفحة الرئيسية</a>
-            <span class="badge">PredictIQ Demo</span>
+            <span class="badge">PredictAI Demo</span>
         </div>
     </header>
 
@@ -250,7 +257,7 @@
     <main class="main-container">
         <div class="services-card">
             <h2>المحفظة الرقمية والخدمات المتاحة</h2>
-            <p class="subtitle">يمكنك هنا تجربة تحميل الهويات والسجلات الرقمية مع تتبع الأحداث بواسطة PredictIQ.</p>
+            <p class="subtitle">يمكنك هنا تجربة تحميل الهويات والسجلات الرقمية مع تتبع الأحداث بواسطة PredictAI.</p>
 
             <div class="services-grid">
                 <!-- Family Record Service -->

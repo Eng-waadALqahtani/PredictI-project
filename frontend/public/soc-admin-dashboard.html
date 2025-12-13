@@ -3,49 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>predictIQ - SOC Admin Dashboard</title>
+    <title>predictAI - SOC Admin Dashboard</title>
     <script src="../js/soc-admin-dashboard.js" defer></script>
     <style>
-        /* (تم الاحتفاظ بجميع التنسيقات الأخرى لنظافة العرض) */
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            /* خلفية زرقاء داكنة (مناسبة لـ SOC) */
-            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #2c3e50;
+        /* ... (احتفظ بالتنسيقات الأساسية السابقة وأضف/استبدل التالي) ... */
+    
+        /* تنسيق الجدول ليطابق التصميم */
+        .dashboard-table table {
+            border-collapse: separate;
+            border-spacing: 0 15px; /* مسافة بين الصفوف */
+        }
+    
+        .dashboard-table thead th {
+            background-color: #1e40af;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+        }
+    
+        .dashboard-table tbody tr {
+            background-color: #f8f9fa; /* لون خلفية الصف */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+    
+        .dashboard-table tbody tr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    
+        .dashboard-table td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+        }
+    
+        .dashboard-table td:first-child {
+            border-right: 1px solid #dee2e6;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+    
+        .dashboard-table td:last-child {
+            border-left: 1px solid #dee2e6;
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+    
+        /* مربع درجة الخطورة الكبير */
+        .risk-box {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 12px;
+            margin: 0 auto;
+        }
+        .risk-high { background-color: #ffe3e3; color: #c92a2a; }
+        .risk-medium { background-color: #fff3bf; color: #f08c00; }
+        .risk-low { background-color: #d3f9d8; color: #2b8a3e; }
+    
+        /* تنسيق معرف البصمة والمستخدم */
+        .fingerprint-id-badge {
+            background-color: #e9ecef;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            color: #495057;
+            font-size: 13px;
+            display: inline-block;
+        }
+    
+        .user-info {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+    
+        /* تنسيق الخصائص السلوكية (Tags) */
+        .behavioral-features {
+            max-width: 350px;
+        }
+        .feature-tag {
+            display: inline-block;
+            background-color: #e2e8f0;
+            color: #2d3748;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 3px;
+            border: 1px solid #cbd5e0;
+        }
+    
+        /* الأزرار العمودية (المهمة) */
+        .action-buttons-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100px; /* عرض ثابت للأزرار */
+        }
+    
+        .soc-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            font-weight: bold;
+            height: 65px; /* ارتفاع ثابت لجعلها مربعة الشكل */
+            width: 100%;
+        }
+    
+        .soc-action-btn i {
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-style: normal;
+        }
+    
+        .soc-action-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(110%);
+        }
+    
+        .btn-green { background-color: #2f9e44; box-shadow: 0 4px 0 #2b8a3e; }
+        .btn-green:active { box-shadow: 0 2px 0 #2b8a3e; transform: translateY(2px); }
+    
+        .btn-red { background-color: #e03131; box-shadow: 0 4px 0 #c92a2a; }
+        .btn-red:active { box-shadow: 0 2px 0 #c92a2a; transform: translateY(2px); }
+    
+        .btn-grey { background-color: #666; box-shadow: 0 4px 0 #555; }
+        .btn-grey:active { box-shadow: 0 2px 0 #555; transform: translateY(2px); }
+
+        /* Reason Badges (Fix for missing reasons) */
+        .reasons-container {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
 
-        h1 {
-            color: #1e40af;
-            font-size: 28px;
-            font-weight: 600;
+        .reason-badge {
+            display: inline-block;
+            background-color: #ffe3e3;
+            color: #c92a2a;
+            border: 1px solid #ffa8a8;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 100%;
+            box-sizing: border-box;
         }
-        
-        .refresh-button {
-            background: #1e40af;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        
-        thead {
-            background: #1e40af;
-            color: white;
-        }
-        /* (بقية التنسيقات CSS محفوظة) */
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🛡️ predictIQ SOC - مراقبة الهجمات في الخلفية</h1>
+            <h1>🛡️ predictAI SOC - مراقبة الهجمات في الخلفية</h1>
             <div class="controls">
                 <a href="/hub.html" class="home-link">← العودة للصفحة الرئيسية</a>
                 <button class="refresh-button" onclick="loadFingerprints()">

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "========================================"
-echo "  PredictIQ - Feature Testing"
+echo "  PredictAI - Feature Testing"
 echo "========================================"
 echo ""
 

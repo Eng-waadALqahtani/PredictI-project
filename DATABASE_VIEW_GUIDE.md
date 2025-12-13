@@ -1,4 +1,4 @@
-# 📊 دليل عرض قاعدة بيانات PredictIQ
+# 📊 دليل عرض قاعدة بيانات PredictAI
 
 ## 🚀 الطريقة السريعة
 
@@ -61,7 +61,7 @@ python backend/view_database.py --export backup.json
 ### DB Browser for SQLite (GUI)
 
 1. **تحميل من:** https://sqlitebrowser.org/
-2. **فتح الملف:** `predictiq.db`
+2. **فتح الملف:** `predictai.db`
 3. **عرض الجدول:** `fingerprints`
 
 **مميزات:**
@@ -94,7 +94,7 @@ http://localhost:5000/api/v1/fingerprints
 ### SQLite Command Line
 
 ```bash
-sqlite3 predictiq.db
+sqlite3 predictai.db
 
 # عرض جميع البصمات
 SELECT * FROM fingerprints;
@@ -111,7 +111,7 @@ WHERE status = 'ACTIVE';
 
 **المسار الكامل:**
 ```
-C:\Users\waaad\OneDrive - ek.com.sa\Documents\hakathoon\predictiq.db
+C:\Users\waaad\OneDrive - ek.com.sa\Documents\hakathoon\predictai.db
 ```
 
 ---

@@ -33,7 +33,7 @@ https://github.com/Eng-waadALqahtani/PredictI-project
 
 Render سيكتشف `render.yaml` تلقائياً، لكن تأكد من:
 
-- **Name**: `predictiq-backend` (أو أي اسم تريده)
+- **Name**: `predictai-backend` (أو أي اسم تريده)
 - **Region**: اختر الأقرب إليك
 - **Branch**: `main`
 - **Root Directory**: اتركه فارغاً (أو `./`)
@@ -69,7 +69,7 @@ Render سيكتشف `render.yaml` تلقائياً، لكن تأكد من:
 - راقب السجلات (Logs) للتأكد من عدم وجود أخطاء
 - عند النجاح، ستحصل على رابط مثل:
   ```
-  https://predictiq-backend.onrender.com
+  https://predictai-backend.onrender.com
   ```
 
 ---
@@ -80,7 +80,7 @@ Render سيكتشف `render.yaml` تلقائياً، لكن تأكد من:
 
 افتح المتصفح واذهب إلى:
 ```
-https://predictiq-backend.onrender.com/api/v1/fingerprints
+https://predictai-backend.onrender.com/api/v1/fingerprints
 ```
 
 يجب أن ترى:
@@ -91,7 +91,7 @@ https://predictiq-backend.onrender.com/api/v1/fingerprints
 ### 2. اختبار Health Check
 
 ```
-https://predictiq-backend.onrender.com/health
+https://predictai-backend.onrender.com/health
 ```
 
 يجب أن ترى:
@@ -109,11 +109,11 @@ https://predictiq-backend.onrender.com/health
 2. تأكد من أن `API_BASE` يحتوي على:
    ```javascript
    const API_BASE = (window.location.hostname.includes("render"))
-     ? "https://predictiq-backend.onrender.com"
+     ? "https://predictai-backend.onrender.com"
      : "http://localhost:5000";
    ```
 
-3. إذا كان الرابط مختلفاً، استبدل `predictiq-backend.onrender.com` بالرابط الصحيح
+3. إذا كان الرابط مختلفاً، استبدل `predictai-backend.onrender.com` بالرابط الصحيح
 
 ---
 
@@ -180,7 +180,7 @@ Render سيعيد النشر تلقائياً!
 
 المشروع الآن منشور على Render وجاهز للاستخدام!
 
-**الرابط**: `https://predictiq-backend.onrender.com`
+**الرابط**: `https://predictai-backend.onrender.com`
 
 ---
 

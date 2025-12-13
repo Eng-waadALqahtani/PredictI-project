@@ -1,157 +1,187 @@
-// Flask backend port - automatically detect the current host
-const API_BASE = `${window.location.protocol}//${window.location.hostname}:5000`;
+// dashboard.js - إصلاح الاتصال والتحكم اليدوي
 
-/**
- * Load fingerprints from the API and display them in the dashboard
- */
+// تحديد رابط الـ API بشكل ديناميكي أكثر دقة
+const API_BASE = (function() {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    
+    // إذا كنا على استضافة سحابية (Render وغيرها)
+    if (hostname.includes("render") || hostname.includes("herokuapp")) {
+        return ""; // استخدام نفس النطاق (Same Origin)
+    }
+    
+    // إذا كنا محلياً، نحاول اكتشاف ما إذا كان الـ Backend يعمل على 5000
+    // يمكنك تغيير هذا الرابط يدوياً إذا كان الباك اند يعمل على رابط مختلف
+    return `${protocol}//${hostname}:5000`;
+})();
+
+console.log("🔌 Dashboard connected to:", API_BASE);
+
 async function loadFingerprints() {
     const loadingMessage = document.getElementById("loading-message");
     const emptyState = document.getElementById("empty-state");
     const table = document.getElementById("fingerprints-table");
     const tbody = document.getElementById("fingerprints-tbody");
     
-    // Show loading state
-    loadingMessage.style.display = "block";
-    emptyState.style.display = "none";
-    table.style.display = "none";
+    // لا نخفي الجدول إذا كان هناك بيانات سابقة (لتقليل الوميض)
+    if (!tbody.hasChildNodes() && loadingMessage) loadingMessage.style.display = "block";
     
     try {
         const response = await fetch(`${API_BASE}/api/v1/fingerprints`);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
         const fingerprints = await response.json();
         
-        // Hide loading
-        loadingMessage.style.display = "none";
+        if (loadingMessage) loadingMessage.style.display = "none";
         
-        // Update stats
+        // تحديث الإحصائيات
         updateStats(fingerprints);
         
-        // Clear existing rows
-        tbody.innerHTML = "";
+        // تفريغ الجدول لإعادة بنائه
+        if (tbody) tbody.innerHTML = "";
         
         if (fingerprints.length === 0) {
-            emptyState.style.display = "block";
-            table.style.display = "none";
+            if (emptyState) emptyState.style.display = "block";
+            if (table) table.style.display = "none";
         } else {
-            emptyState.style.display = "none";
-            table.style.display = "table";
+            if (emptyState) emptyState.style.display = "none";
+            if (table) table.style.display = "table";
             
-            // Display fingerprints in the table
-            fingerprints.forEach(fp => {
+            // ترتيب: الأحدث أولاً أو الأعلى خطورة
+            const sortedFingerprints = fingerprints.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            sortedFingerprints.forEach(fp => {
                 const tr = document.createElement("tr");
                 
-                // Determine risk level styling
+                // تحديد الألوان حسب الخطورة والحالة
                 let riskClass = "risk-low";
-                if (fp.risk_score >= 80) {
-                    riskClass = "risk-high";
-                } else if (fp.risk_score >= 50) {
-                    riskClass = "risk-medium";
-                }
+                if (fp.risk_score >= 80) riskClass = "risk-high";
+                else if (fp.risk_score >= 50) riskClass = "risk-medium";
                 
-                // Format behavioral features
+                // تحديد حالة الزر (هل النظام قام بالحظر تلقائياً؟)
+                const isBlocked = (fp.status === "BLOCKED");
+                
+                let actionButtonsHtml = '';
+
+                // --- منطق التحكم اليدوي ---
+                // زر الحظر (يظهر فقط إذا لم يكن محظوراً)
+                if (!isBlocked) {
+                    actionButtonsHtml += `
+                        <button class="action-button block-now-button" 
+                                onclick="manualAction('block', '${fp.fingerprint_id}', '${fp.user_id}')"
+                                style="background-color: #dc3545; color: white;"
+                                title="فرض الحظر يدوياً">
+                            🚫 منع
+                        </button>
+                    `;
+                }
+
+                // زر السماح/رفع الحظر (يظهر دائماً لمنحك السيطرة)
+                actionButtonsHtml += `
+                    <button class="action-button unblock-user-button" 
+                            onclick="manualAction('unblock', '${fp.fingerprint_id}', '${fp.user_id}')"
+                            style="background-color: #28a745; color: white;"
+                            title="إجبار النظام على السماح">
+                        ✅ سماح / رفع حظر
+                    </button>
+                `;
+
+                // زر الحذف
+                actionButtonsHtml += `
+                    <button class="action-button delete-button" 
+                            onclick="manualAction('delete', '${fp.fingerprint_id}')"
+                            style="background-color: #6c757d; color: white;">
+                        🗑️ حذف
+                    </button>
+                `;
+                
+                // عرض الميزات السلوكية
                 const featuresHtml = formatBehavioralFeatures(fp.behavioral_features);
                 
-                // Format similar fingerprints badge if present
-                let similarityBadge = '';
-                if (fp.related_fingerprints && fp.related_fingerprints.length > 0) {
-                    const blockedCount = fp.related_fingerprints.filter(rf => 
-                        rf.status === 'BLOCKED' || rf.status === 'ACTIVE'
-                    ).length;
-                    const highestSim = Math.max(...fp.related_fingerprints.map(rf => rf.similarity || 0));
-                    const simPercent = (highestSim * 100).toFixed(0);
-                    
-                    similarityBadge = `<span class="similarity-badge" title="Similar to ${fp.related_fingerprints.length} previous fingerprint(s), highest similarity: ${simPercent}%">
-                        🔗 Similar to ${fp.related_fingerprints.length} previous${blockedCount > 0 ? ` (${blockedCount} BLOCKED/ACTIVE)` : ''}
-                    </span>`;
-                }
-                
                 tr.innerHTML = `
-                    <td><code>${fp.fingerprint_id}</code>${similarityBadge}</td>
-                    <td>
-                        <span class="risk-score ${riskClass}">
-                            ${fp.risk_score}
-                        </span>
-                    </td>
-                    <td class="behavioral-features">
-                        ${featuresHtml}
-                    </td>
+                    <td><code>${fp.fingerprint_id.substring(0, 8)}...</code></td>
+                    <td>${fp.user_id || 'Unknown'}</td>
+                    <td><span class="risk-score ${riskClass}">${fp.risk_score}</span> <br> <small>${fp.status}</small></td>
+                    <td class="behavioral-features">${featuresHtml}</td>
+                    <td><div class="action-buttons" style="display:flex; gap:5px;">${actionButtonsHtml}</div></td>
                 `;
                 
                 tbody.appendChild(tr);
             });
         }
         
-        // Update last updated time
         const now = new Date();
-        document.getElementById("last-updated").textContent = 
-            `Last updated: ${now.toLocaleTimeString()}`;
+        const lastUp = document.getElementById("last-updated");
+        if(lastUp) lastUp.textContent = `Last updated: ${now.toLocaleTimeString()}`;
             
     } catch (error) {
         console.error("Error loading fingerprints:", error);
-        loadingMessage.style.display = "none";
-        emptyState.style.display = "block";
-        emptyState.innerHTML = `
-            <h3>Error Loading Fingerprints</h3>
-            <p>${error.message}</p>
-            <p style="margin-top: 10px; color: #999;">Make sure the backend server is running on port 5000.</p>
-        `;
-        table.style.display = "none";
+        if (loadingMessage) loadingMessage.innerHTML = `<span style="color:red">Error connecting to API: ${error.message}</span>`;
     }
 }
 
-/**
- * Update the statistics cards
- */
+// دالة موحدة للتحكم اليدوي وإرسال الأوامر
+async function manualAction(action, fingerprintId, userId) {
+    let endpoint = "";
+    let body = { fingerprint_id: fingerprintId };
+    
+    if (action === 'block') endpoint = '/api/v1/confirm-threat';
+    if (action === 'unblock') {
+        endpoint = '/api/v1/unblock-user';
+        body = { user_id: userId }; // رفع الحظر يعتمد على User ID
+    }
+    if (action === 'delete') endpoint = '/api/v1/delete-fingerprint';
+
+    if(!confirm(`هل أنت متأكد من تنفيذ: ${action}؟`)) return;
+
+    try {
+        const response = await fetch(`${API_BASE}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+            alert("✅ تم تنفيذ الأمر بنجاح");
+            
+            // إرسال إشارة لكل الصفحات المفتوحة لتحديث حالتها فوراً
+            if (action === 'unblock') {
+                localStorage.setItem('fingerprint_action', 'unblock');
+                localStorage.setItem('fingerprint_user_id', userId);
+                localStorage.setItem('fingerprint_updated', Date.now());
+            }
+            
+            loadFingerprints(); // تحديث الجدول
+        } else {
+            alert("❌ فشل تنفيذ الأمر");
+        }
+    } catch (e) {
+        alert("خطأ في الاتصال: " + e.message);
+    }
+}
+
 function updateStats(fingerprints) {
     const totalCount = fingerprints.length;
     const highRiskCount = fingerprints.filter(fp => fp.risk_score >= 80).length;
     const mediumRiskCount = fingerprints.filter(fp => fp.risk_score >= 50 && fp.risk_score < 80).length;
     
-    document.getElementById("total-count").textContent = totalCount;
-    document.getElementById("high-risk-count").textContent = highRiskCount;
-    document.getElementById("medium-risk-count").textContent = mediumRiskCount;
+    if(document.getElementById("total-count")) document.getElementById("total-count").textContent = totalCount;
+    if(document.getElementById("high-risk-count")) document.getElementById("high-risk-count").textContent = highRiskCount;
+    if(document.getElementById("medium-risk-count")) document.getElementById("medium-risk-count").textContent = mediumRiskCount;
 }
 
-/**
- * Format behavioral features for display
- */
 function formatBehavioralFeatures(features) {
-    if (!features || typeof features !== 'object') {
-        return '<span class="feature-item">No features</span>';
-    }
-    
-    const featureItems = Object.entries(features).map(([key, value]) => {
-        // Format key to be more readable
-        const formattedKey = key
-            .replace(/_/g, ' ')
-            .replace(/\b\w/g, l => l.toUpperCase());
-        
-        // Format value appropriately
-        let formattedValue = value;
-        if (typeof value === 'number') {
-            if (key.includes('per_minute') || key.includes('rate')) {
-                formattedValue = value.toFixed(2);
-            } else {
-                formattedValue = value.toString();
-            }
-        }
-        
-        return `<span class="feature-item" title="${key}">${formattedKey}: <strong>${formattedValue}</strong></span>`;
-    });
-    
-    return featureItems.join('');
+    if (!features || typeof features !== 'object') return 'No features';
+    return Object.entries(features).map(([key, value]) => {
+        let val = typeof value === 'number' ? value.toFixed(1) : value;
+        return `<span class="feature-item" style="display:inline-block; background:#eee; padding:2px 5px; margin:2px; border-radius:4px; font-size:11px;">${key}: <b>${val}</b></span>`;
+    }).join('');
 }
 
-// Load fingerprints on page load
+// التشغيل التلقائي
 if (typeof window !== "undefined") {
-    window.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener('DOMContentLoaded', () => {
         loadFingerprints();
-        
-        // Auto-refresh every 5 seconds
         setInterval(loadFingerprints, 5000);
     });
 }

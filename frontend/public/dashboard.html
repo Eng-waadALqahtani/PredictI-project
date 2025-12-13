@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>predictIQ - لوحة التحكم</title>
+    <title>predictAI - لوحة التحكم</title>
     <style>
         * {
             margin: 0;
@@ -484,7 +484,7 @@
     
     <div class="container content-overlay">
         <header>
-            <h1>🛡️ predictIQ - لوحة التحكم</h1>
+            <h1>🛡️ predictAI - لوحة التحكم</h1>
             <div class="controls">
                 <a href="/hub.html" class="home-link">← العودة للصفحة الرئيسية</a>
                 <button class="refresh-button" onclick="refreshCurrentTab()">
@@ -535,7 +535,9 @@
                     <thead>
                         <tr>
                             <th>معرف البصمة</th>
+                            <th>معرف المستخدم</th>
                             <th>درجة الخطورة</th>
+                            <th>الحالة</th>
                             <th>الخصائص السلوكية</th>
                         </tr>
                     </thead>
@@ -597,32 +599,25 @@
     <div class="success-message" id="successMessage"></div>
     
     <script>
-        // Flask backend port - automatically detect the current host
-        // Dynamic API base URL: Use Render URL in production, localhost in development
+        // تحديد رابط السيرفر تلقائياً (يدعم Render و Localhost)
         const isRender = window.location.hostname.includes("render") || 
                         window.location.hostname.includes("onrender.com") ||
                         (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1");
         
         const API_BASE = isRender 
-            ? "https://predictiq-backend.onrender.com"
+            ? "https://predictai-backend.onrender.com"
             : `${window.location.protocol}//${window.location.hostname}:5000`;
         
-        // Track previous fingerprint count for notifications
+        // متغيرات التتبع
         let previousFingerprintCount = 0;
-        let previousFingerprintIds = new Set();
-        
-        // Tab switching
+        let refreshInterval = null;
+    
+        // دالة التبديل بين التبويبات
         function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
+            event.target.classList.add('active');
             
             if (tab === 'view') {
                 document.getElementById('view-tab').classList.add('active');
@@ -632,395 +627,234 @@
                 loadAdminFingerprints();
             }
         }
-        
-        // Refresh current tab
+    
         function refreshCurrentTab() {
             const activeTab = document.querySelector('.tab-content.active');
-            if (activeTab.id === 'view-tab') {
-                loadViewFingerprints();
-            } else {
-                loadAdminFingerprints();
-            }
+            if (activeTab.id === 'view-tab') loadViewFingerprints();
+            else loadAdminFingerprints();
         }
-        
-        // Load fingerprints for view tab (simple)
-        async function loadViewFingerprints() {
-            const loadingMessage = document.getElementById("view-loading-message");
-            const emptyState = document.getElementById("view-empty-state");
-            const table = document.getElementById("view-fingerprints-table");
-            const tbody = document.getElementById("view-fingerprints-tbody");
-            
-            loadingMessage.style.display = "block";
-            emptyState.style.display = "none";
-            table.style.display = "none";
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/v1/fingerprints`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const fingerprints = await response.json();
-                loadingMessage.style.display = "none";
-                
-                // Update stats
-                const totalCount = fingerprints.length;
-                const highRiskCount = fingerprints.filter(fp => fp.risk_score >= 80).length;
-                const mediumRiskCount = fingerprints.filter(fp => fp.risk_score >= 50 && fp.risk_score < 80).length;
-                
-                document.getElementById("view-total-count").textContent = totalCount;
-                document.getElementById("view-high-risk-count").textContent = highRiskCount;
-                document.getElementById("view-medium-risk-count").textContent = mediumRiskCount;
-                
-                tbody.innerHTML = "";
-                
-                if (fingerprints.length === 0) {
-                    emptyState.style.display = "block";
-                    table.style.display = "none";
-                } else {
-                    emptyState.style.display = "none";
-                    table.style.display = "table";
-                    
-                    fingerprints.forEach(fp => {
-                        const tr = document.createElement("tr");
-                        let riskClass = "risk-low";
-                        if (fp.risk_score >= 80) riskClass = "risk-high";
-                        else if (fp.risk_score >= 50) riskClass = "risk-medium";
-                        
-                        const featuresHtml = formatBehavioralFeatures(fp.behavioral_features);
-                        
-                        tr.innerHTML = `
-                            <td><code>${fp.fingerprint_id}</code></td>
-                            <td><span class="risk-score ${riskClass}">${fp.risk_score}</span></td>
-                            <td class="behavioral-features">${featuresHtml}</td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-                
-                const now = new Date();
-                document.getElementById("last-updated").textContent = 
-                    `آخر تحديث: ${now.toLocaleTimeString('ar-SA')}`;
-                    
-            } catch (error) {
-                console.error("Error loading fingerprints:", error);
-                loadingMessage.style.display = "none";
-                emptyState.style.display = "block";
-                emptyState.innerHTML = `<h3>خطأ في تحميل البصمات</h3><p>${error.message}</p>`;
-                table.style.display = "none";
-            }
-        }
-        
-        // Load fingerprints for admin tab (SOC)
-        async function loadAdminFingerprints() {
-            const loadingMessage = document.getElementById("admin-loading-message");
-            const emptyState = document.getElementById("admin-empty-state");
-            const table = document.getElementById("admin-fingerprints-table");
-            const tbody = document.getElementById("admin-fingerprints-tbody");
-            
-            if (previousFingerprintCount === 0) {
-                loadingMessage.style.display = "block";
-            }
-            emptyState.style.display = "none";
-            table.style.display = "none";
-            
-            try {
-                const response = await fetch(`${API_BASE}/api/v1/fingerprints`);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const fingerprints = await response.json();
-                loadingMessage.style.display = "none";
-                
-                // Check for new fingerprints
-                const currentFingerprintIds = new Set(fingerprints.map(fp => fp.fingerprint_id));
-                const newFingerprints = fingerprints.filter(fp => !previousFingerprintIds.has(fp.fingerprint_id));
-                
-                if (newFingerprints.length > 0 && previousFingerprintIds.size > 0) {
-                    showNewFingerprintNotification(newFingerprints);
-                }
-                
-                previousFingerprintCount = fingerprints.length;
-                previousFingerprintIds = currentFingerprintIds;
-                
-                // Update stats
-                const totalCount = fingerprints.length;
-                const activeCount = fingerprints.filter(fp => fp.status === "ACTIVE").length;
-                const blockedCount = fingerprints.filter(fp => fp.status === "BLOCKED").length;
-                const clearedCount = fingerprints.filter(fp => fp.status === "CLEARED").length;
-                
-                document.getElementById("admin-total-count").textContent = totalCount;
-                document.getElementById("admin-active-count").textContent = activeCount;
-                document.getElementById("admin-blocked-count").textContent = blockedCount;
-                document.getElementById("admin-cleared-count").textContent = clearedCount;
-                
-                tbody.innerHTML = "";
-                
-                if (fingerprints.length === 0) {
-                    emptyState.style.display = "block";
-                    table.style.display = "none";
-                } else {
-                    emptyState.style.display = "none";
-                    table.style.display = "table";
-                    
-                    const sortedFingerprints = fingerprints.sort((a, b) => {
-                        if (a.status === "ACTIVE" && b.status !== "ACTIVE") return -1;
-                        if (a.status !== "ACTIVE" && b.status === "ACTIVE") return 1;
-                        return b.risk_score - a.risk_score;
-                    });
-                    
-                    sortedFingerprints.forEach(fp => {
-                        const tr = document.createElement("tr");
-                        let riskClass = "risk-low";
-                        if (fp.risk_score >= 80) riskClass = "risk-high";
-                        else if (fp.risk_score >= 50) riskClass = "risk-medium";
-                        
-                        let statusClass = "status-active";
-                        let statusText = "نشطة";
-                        if (fp.status === "BLOCKED") {
-                            statusClass = "status-blocked";
-                            statusText = "محظورة";
-                        } else if (fp.status === "CLEARED") {
-                            statusClass = "status-cleared";
-                            statusText = "مُزال المنع";
-                        }
-                        
-                        const featuresHtml = formatBehavioralFeatures(fp.behavioral_features);
-                        
-                        tr.innerHTML = `
-                            <td><code>${fp.fingerprint_id}</code></td>
-                            <td>${fp.user_id || 'غير محدد'}</td>
-                            <td><span class="risk-score ${riskClass}">${fp.risk_score}</span></td>
-                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                            <td class="behavioral-features">${featuresHtml}</td>
-                            <td>
-                                <div class="action-buttons">
-                                    ${fp.status === "ACTIVE" ? `
-                                        <button class="action-button unblock-button" 
-                                                onclick="unblockUser('${fp.user_id}', '${fp.fingerprint_id}')">
-                                            🔓 إزالة المنع
-                                        </button>
-                                        <button class="action-button confirm-button" 
-                                                onclick="confirmThreat('${fp.fingerprint_id}')">
-                                            ✅ تأكيد التهديد
-                                        </button>
-                                    ` : ''}
-                                    <button class="action-button delete-button" 
-                                            onclick="deleteFingerprint('${fp.fingerprint_id}')"
-                                            title="حذف البصمة من الذاكرة">
-                                        🗑️ حذف
-                                    </button>
-                                </div>
-                            </td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                }
-                
-                const now = new Date();
-                document.getElementById("last-updated").textContent = 
-                    `آخر تحديث: ${now.toLocaleTimeString('ar-SA')}`;
-                    
-            } catch (error) {
-                console.error("Error loading fingerprints:", error);
-                loadingMessage.style.display = "none";
-                emptyState.style.display = "block";
-                emptyState.innerHTML = `<h3>خطأ في تحميل البصمات</h3><p>${error.message}</p>`;
-                table.style.display = "none";
-            }
-        }
-        
-        // Format behavioral features
-        function formatBehavioralFeatures(features) {
-            if (!features || typeof features !== 'object') {
-                return '<span class="feature-item">لا توجد خصائص</span>';
-            }
-            
-            const featureItems = Object.entries(features).map(([key, value]) => {
-                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                let formattedValue = value;
-                if (typeof value === 'number') {
-                    if (key.includes('per_minute') || key.includes('rate')) {
-                        formattedValue = value.toFixed(2);
-                    } else {
-                        formattedValue = value.toString();
-                    }
-                }
-                return `<span class="feature-item" title="${key}">${formattedKey}: <strong>${formattedValue}</strong></span>`;
-            });
-            
-            return featureItems.join('');
-        }
-        
-        // Show new fingerprint notification
-        function showNewFingerprintNotification(newFingerprints) {
-            const message = document.getElementById("successMessage");
-            message.textContent = `🚨 تم اكتشاف ${newFingerprints.length} بصمة تهديد جديدة!`;
-            message.classList.add("show");
-            setTimeout(() => {
-                message.classList.remove("show");
-            }, 5000);
-        }
-        
-        // Unblock user
+    
+        // ==========================================
+        //  الوظائف الأساسية: فك الحظر والحذف
+        // ==========================================
+    
+        // دالة فك الحظر (محسنة لإرسال إشارة فورية لكل الصفحات)
         async function unblockUser(userId, fingerprintId) {
-            if (!confirm(`هل أنت متأكد من إزالة المنع عن المستخدم ${userId}?`)) {
-                return;
-            }
-            
+            if (!confirm(`هل أنت متأكد من رفع الحظر عن المستخدم ${userId}؟`)) return;
+    
+            // تغيير نص الزر ليعرف المستخدم أن العمل جارٍ
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = "جاري التنفيذ...";
+            btn.disabled = true;
+    
             try {
                 const response = await fetch(`${API_BASE}/api/v1/unblock-user`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ user_id: userId })
                 });
-                
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                const message = document.getElementById("successMessage");
-                message.textContent = `✅ ${result.message || 'تم إزالة المنع بنجاح'}`;
-                message.classList.add("show");
-                setTimeout(() => {
-                    message.classList.remove("show");
-                }, 3000);
-                
-                // إرسال إشارة للصفحات المفتوحة لإعادة التحقق
-                const now = Date.now().toString();
-                localStorage.setItem('fingerprint_updated', now);
-                localStorage.setItem('fingerprint_action', 'unblock');
-                localStorage.setItem('fingerprint_user_id', userId);
-                
-                // Dispatch custom event for same-tab pages (if any)
-                window.dispatchEvent(new CustomEvent('fingerprintStatusChanged', {
-                    detail: {
-                        action: 'unblock',
-                        user_id: userId,
-                        timestamp: now
-                    }
-                }));
-                
-                console.log(`🔄 [SYNC] Triggered unblock sync for user ${userId} (timestamp: ${now})`);
-                
-                loadAdminFingerprints();
+    
+                if (response.ok) {
+                    // 1. تحديث التخزين المحلي لإجبار الصفحات الأخرى (أبشر/توكلنا) على التحديث فوراً
+                    const now = Date.now().toString();
+                    localStorage.setItem('fingerprint_updated', now);
+                    localStorage.setItem('fingerprint_action', 'unblock');
+                    localStorage.setItem('fingerprint_user_id', userId);
+    
+                    // 2. إظهار رسالة نجاح
+                    showSuccess(`✅ تم رفع الحظر عن ${userId} بنجاح`);
+                    
+                    // 3. تحديث الجدول
+                    refreshCurrentTab();
+                } else {
+                    throw new Error("فشل الاتصال بالسيرفر");
+                }
             } catch (error) {
-                console.error("Error unblocking user:", error);
-                alert("خطأ في إزالة المنع: " + error.message);
+                alert("خطأ: " + error.message);
+                btn.textContent = originalText;
+                btn.disabled = false;
             }
         }
-        
-        // Confirm threat
+    
+        // دالة تأكيد التهديد (الحظر اليدوي)
         async function confirmThreat(fingerprintId) {
-            if (!confirm(`هل أنت متأكد من تأكيد التهديد للبصمة ${fingerprintId}?`)) {
-                return;
-            }
-            
+            if (!confirm(`هل تريد حظر المستخدم صاحب البصمة ${fingerprintId}؟`)) return;
+    
             try {
                 const response = await fetch(`${API_BASE}/api/v1/confirm-threat`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ fingerprint_id: fingerprintId })
                 });
-                
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                const message = document.getElementById("successMessage");
-                message.textContent = `✅ ${result.message || 'تم تأكيد التهديد بنجاح'}`;
-                message.classList.add("show");
-                setTimeout(() => {
-                    message.classList.remove("show");
-                }, 3000);
-                
-                loadAdminFingerprints();
+    
+                if (response.ok) {
+                    // البحث عن معرف المستخدم المرتبط بهذه البصمة لإرسال إشارة الحظر
+                    // (نقوم بتحديث الجدول للحصول على أحدث البيانات)
+                    refreshCurrentTab();
+                    showSuccess("🚫 تم حظر المستخدم بنجاح");
+                }
             } catch (error) {
-                console.error("Error confirming threat:", error);
-                alert("خطأ في تأكيد التهديد: " + error.message);
+                alert("خطأ: " + error.message);
             }
         }
-        
-        // Delete fingerprint
+    
+        // دالة الحذف
         async function deleteFingerprint(fingerprintId) {
-            if (!confirm(`هل أنت متأكد من حذف البصمة ${fingerprintId}؟ سيتم حذفها نهائياً من الذاكرة.`)) {
-                return;
-            }
-            
+            if (!confirm("حذف البصمة نهائياً؟")) return;
+    
             try {
-                // الحصول على user_id قبل الحذف
-                let userId = null;
-                const fingerprints = await fetch(`${API_BASE}/api/v1/fingerprints`).then(r => r.json());
-                const fp = fingerprints.find(f => f.fingerprint_id === fingerprintId);
-                if (fp) {
-                    userId = fp.user_id;
-                }
-                
-                const response = await fetch(`${API_BASE}/api/v1/delete-fingerprint`, {
+                await fetch(`${API_BASE}/api/v1/delete-fingerprint`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ fingerprint_id: fingerprintId })
                 });
                 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                
-                const result = await response.json();
-                const message = document.getElementById("successMessage");
-                message.textContent = `✅ ${result.message || 'تم حذف البصمة بنجاح'}`;
-                message.classList.add("show");
-                setTimeout(() => {
-                    message.classList.remove("show");
-                }, 3000);
-                
-                // إرسال إشارة للصفحات المفتوحة لإعادة التحقق
-                if (userId) {
-                    localStorage.setItem('fingerprint_updated', Date.now().toString());
-                    localStorage.setItem('fingerprint_action', 'delete');
-                    localStorage.setItem('fingerprint_user_id', userId);
-                }
-                
-                // Reload fingerprints for the active tab
-                const activeTab = document.querySelector('.tab-content.active');
-                if (activeTab.id === 'view-tab') {
-                    loadViewFingerprints();
-                } else {
-                    loadAdminFingerprints();
-                }
+                showSuccess("🗑️ تم حذف البصمة");
+                refreshCurrentTab();
             } catch (error) {
-                console.error("Error deleting fingerprint:", error);
-                alert("خطأ في حذف البصمة: " + error.message);
+                console.error(error);
             }
         }
-        
-        // Initialize background animations
-        window.addEventListener('DOMContentLoaded', () => {
-            const bg = document.getElementById('dynamicBg');
-            if (!bg) return;
-            
-            let currentX = 0, currentY = 0, targetX = 0, targetY = 0;
-            
-            document.addEventListener('mousemove', (e) => {
-                const mouseX = e.clientX / window.innerWidth;
-                const mouseY = e.clientY / window.innerHeight;
-                targetX = (mouseX - 0.5) * 50;
-                targetY = (mouseY - 0.5) * 50;
+    
+        // ==========================================
+        //  وظائف العرض والتحميل
+        // ==========================================
+    
+        async function loadViewFingerprints() {
+            // (نفس المنطق السابق ولكن مبسط)
+            const tbody = document.getElementById("view-fingerprints-tbody");
+            const loading = document.getElementById("view-loading-message");
+            if(tbody.children.length === 0) loading.style.display = "block";
+    
+            try {
+                const data = await fetch(`${API_BASE}/api/v1/fingerprints`).then(r => r.json());
+                loading.style.display = "none";
+                renderTable(data, 'view');
+                updateStats(data, 'view');
+            } catch(e) { console.error(e); }
+        }
+    
+        async function loadAdminFingerprints() {
+            const tbody = document.getElementById("admin-fingerprints-tbody");
+            try {
+                const data = await fetch(`${API_BASE}/api/v1/fingerprints`).then(r => r.json());
+                renderTable(data, 'admin');
+                updateStats(data, 'admin');
+            } catch(e) { console.error(e); }
+        }
+    
+        function renderTable(data, mode) {
+            const tbody = document.getElementById(`${mode}-fingerprints-tbody`);
+            const empty = document.getElementById(`${mode}-empty-state`);
+            const table = document.getElementById(`${mode}-fingerprints-table`);
+    
+            if (data.length === 0) {
+                empty.style.display = "block";
+                table.style.display = "none";
+                return;
+            }
+    
+            empty.style.display = "none";
+            table.style.display = "table";
+            tbody.innerHTML = "";
+    
+            // ترتيب: المحظور أولاً، ثم عالي الخطورة
+            const sorted = data.sort((a, b) => {
+                if (a.status === 'BLOCKED') return -1;
+                return b.risk_score - a.risk_score;
+            });
+    
+            sorted.forEach(fp => {
+                const tr = document.createElement("tr");
+                
+                // تحديد الألوان
+                let riskClass = fp.risk_score >= 80 ? "risk-high" : (fp.risk_score >= 50 ? "risk-medium" : "risk-low");
+                let statusBadge = `<span class="status-badge status-active">نشطة</span>`;
+                if (fp.status === 'BLOCKED') statusBadge = `<span class="status-badge status-blocked">محظورة</span>`;
+                else if (fp.status === 'CLEARED') statusBadge = `<span class="status-badge status-cleared">مسموح</span>`;
+    
+                const features = Object.entries(fp.behavioral_features || {})
+                    .map(([k,v]) => `<span class="feature-item">${k}: <b>${typeof v==='number'?v.toFixed(1):v}</b></span>`)
+                    .join('');
+
+                if (mode === 'view') {
+                    // عرض فقط - بدون أزرار تحكم
+                    tr.innerHTML = `
+                        <td><code>${fp.fingerprint_id.substring(0,12)}...</code></td>
+                        <td>${fp.user_id || 'غير محدد'}</td>
+                        <td><span class="risk-score ${riskClass}">${fp.risk_score}</span></td>
+                        <td>${statusBadge}</td>
+                        <td class="behavioral-features">${features}</td>
+                    `;
+                } else {
+                    // إدارة SOC - 3 أزرار دائماً: تأكيد المنع، إزالة المنع، حذف
+                    const actions = `
+                        <button class="action-button confirm-button" 
+                                onclick="confirmThreat('${fp.fingerprint_id}')"
+                                title="تأكيد التهديد وحظر المستخدم">
+                            🚫 تأكيد المنع
+                        </button>
+                        <button class="action-button unblock-button" 
+                                onclick="unblockUser('${fp.user_id}', '${fp.fingerprint_id}')"
+                                title="إزالة المنع والسماح للمستخدم">
+                            🔓 إزالة المنع
+                        </button>
+                        <button class="action-button delete-button" 
+                                onclick="deleteFingerprint('${fp.fingerprint_id}')"
+                                title="حذف البصمة من الذاكرة">
+                            🗑️ حذف
+                        </button>
+                    `;
+                    tr.innerHTML = `
+                        <td><code>${fp.fingerprint_id.substring(0,12)}...</code></td>
+                        <td>${fp.user_id || 'غير محدد'}</td>
+                        <td><span class="risk-score ${riskClass}">${fp.risk_score}</span></td>
+                        <td>${statusBadge}</td>
+                        <td class="behavioral-features">${features}</td>
+                        <td><div class="action-buttons" style="display: flex; gap: 5px; flex-wrap: wrap;">${actions}</div></td>
+                    `;
+                }
+                tbody.appendChild(tr);
             });
             
-            function animateParallax() {
-                currentX += (targetX - currentX) * 0.05;
-                currentY += (targetY - currentY) * 0.05;
-                bg.style.transform = `translate(${currentX}px, ${currentY}px)`;
-                requestAnimationFrame(animateParallax);
+            document.getElementById("last-updated").textContent = `آخر تحديث: ${new Date().toLocaleTimeString('ar-SA')}`;
+        }
+    
+        function updateStats(data, mode) {
+            if (mode === 'view') {
+                document.getElementById("view-total-count").textContent = data.length;
+                document.getElementById("view-high-risk-count").textContent = data.filter(f => f.risk_score >= 80).length;
+                document.getElementById("view-medium-risk-count").textContent = data.filter(f => f.risk_score >= 50 && f.risk_score < 80).length;
+            } else {
+                document.getElementById("admin-total-count").textContent = data.length;
+                document.getElementById("admin-active-count").textContent = data.filter(f => f.status === 'ACTIVE').length;
+                document.getElementById("admin-blocked-count").textContent = data.filter(f => f.status === 'BLOCKED').length;
+                document.getElementById("admin-cleared-count").textContent = data.filter(f => f.status === 'CLEARED').length;
             }
-            animateParallax();
-            
-            // Load initial tab
+        }
+    
+        function showSuccess(msg) {
+            const el = document.getElementById("successMessage");
+            el.textContent = msg;
+            el.classList.add("show");
+            setTimeout(() => el.classList.remove("show"), 3000);
+        }
+    
+        // التشغيل عند التحميل
+        window.addEventListener('DOMContentLoaded', () => {
+            // تشغيل خلفية الأنميشن
+            const bg = document.getElementById('dynamicBg');
+            if (bg) {
+                document.addEventListener('mousemove', (e) => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                    bg.style.transform = `translate(${x}px, ${y}px)`;
+                });
+            }
+    
             loadViewFingerprints();
-            
-            // Auto-refresh every 5 seconds
-            setInterval(() => {
-                const activeTab = document.querySelector('.tab-content.active');
-                if (activeTab.id === 'view-tab') {
-                    loadViewFingerprints();
-                } else {
-                    loadAdminFingerprints();
-                }
-            }, 5000);
+            setInterval(refreshCurrentTab, 3000); // تحديث كل 3 ثواني
         });
     </script>
 </body>
